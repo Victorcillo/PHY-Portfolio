@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="ko" data-lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>박해윤 업무 자동화 포트폴리오</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one left-aligned column; the 60s reel leads, each tool is a text + screen pair, numbers sit in a ruled strip.
+   Palette: PHY's own app colours (blue, amber, green, sky, violet) on cool paper. */
+:root{
+  --bg:#F3F6FB; --surface:#FFFFFF; --surface-2:#E9EEF7; --line:#D5DDEC;
+  --ink:#0D1A30; --ink-2:#44506B; --ink-3:#6A7691;
+  --blue:#2457F5; --blue-t:#E3EBFF;
+  --amber:#B86E00; --amber-t:#FFF0D2;
+  --green:#0B8A63; --green-t:#D9F4E9;
+  --sky:#0877C4; --sky-t:#DCEFFC;
+  --violet:#6B3FD4; --violet-t:#ECE4FF;
+  --f-display:"Bricolage Grotesque","Noto Sans KR",system-ui,sans-serif;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --shadow:0 20px 44px -22px rgba(20,50,120,.35);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#08101F; --surface:#0F1A31; --surface-2:#16233F; --line:#243557;
+    --ink:#EAF0FC; --ink-2:#B4C0DA; --ink-3:#8795B4;
+    --blue:#7FA4FF; --blue-t:#172A58;
+    --amber:#FFC24D; --amber-t:#3A2C10;
+    --green:#4FD3A6; --green-t:#0F3A2F;
+    --sky:#5CB8FF; --sky-t:#10304D;
+    --violet:#B79BFF; --violet-t:#2A1F4D;
+    --shadow:0 20px 44px -22px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#08101F; --surface:#0F1A31; --surface-2:#16233F; --line:#243557;
+  --ink:#EAF0FC; --ink-2:#B4C0DA; --ink-3:#8795B4;
+  --blue:#7FA4FF; --blue-t:#172A58;
+  --amber:#FFC24D; --amber-t:#3A2C10;
+  --green:#4FD3A6; --green-t:#0F3A2F;
+  --sky:#5CB8FF; --sky-t:#10304D;
+  --violet:#B79BFF; --violet-t:#2A1F4D;
+  --shadow:0 20px 44px -22px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.75;word-break:keep-all;overflow-wrap:break-word}
+img,video{display:block;max-width:100%;height:auto}
+h1,h2,h3,p,ul,figure{margin:0}
+ul{padding:0;list-style:none}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:6px}
+.wrap{width:100%;max-width:1060px;margin-inline:auto;padding-inline:20px}
+html[data-lang="ko"] [lang="en"],html[data-lang="en"] [lang="ko"]{display:none!important}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font:600 12.5px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px}
+.bar nav{display:flex;gap:18px;font-size:14px;color:var(--ink-2)}
+.bar nav a{text-decoration:none}
+.bar nav a:hover{color:var(--ink)}
+.ctrls{display:flex;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:3px}
+.seg button{font:600 13px/1 var(--f-mono);border:0;background:transparent;color:var(--ink-3);padding:8px 12px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+@media(max-width:700px){.bar nav{display:none}}
+
+/* hero */
+.hero{padding-block:64px 24px;display:grid;gap:30px}
+.hero h1{font:800 clamp(34px,6vw,64px)/1.1 var(--f-display);letter-spacing:-.025em;max-width:15em;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--blue)}
+.hero .lede{font-size:clamp(16px,2vw,19px);color:var(--ink-2);max-width:40em}
+.hero .who{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:baseline}
+.hero .who b{font:700 18px var(--f-display)}
+.reel{background:#0A1B45;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line)}
+.reel video{width:100%;aspect-ratio:16/9;background:#0A1B45}
+.reel-cap{font-size:13.5px;color:var(--ink-3);margin-top:-10px}
+
+/* numbers */
+.nums{display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid var(--line);margin-top:34px}
+.num{padding:26px 22px 24px 0;display:grid;gap:8px;align-content:start}
+.num+.num{padding-left:22px;border-left:1px solid var(--line)}
+.num b{font:800 clamp(30px,4.4vw,46px)/1 var(--f-display);letter-spacing:-.02em}
+.num b small{font-size:.5em;font-weight:700;color:var(--ink-3);margin-left:4px}
+.num span{font-size:14.5px;color:var(--ink-2)}
+.num:nth-child(1) b{color:var(--blue)} .num:nth-child(2) b{color:var(--green)} .num:nth-child(3) b{color:var(--amber)}
+@media(max-width:720px){.nums{grid-template-columns:1fr}.num,.num+.num{padding:20px 0;border-left:0}.num+.num{border-top:1px solid var(--line)}}
+
+/* sections */
+section{padding-block:72px 0}
+.sec-h{display:grid;gap:10px;margin-bottom:28px}
+.sec-h h2{font:800 clamp(26px,3.6vw,38px)/1.2 var(--f-display);letter-spacing:-.02em;text-wrap:balance}
+.sec-h p{color:var(--ink-2);max-width:42em}
+.tools-top{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}
+.tools-top .seg{align-self:end}
+
+/* tool rows */
+.tool{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:34px;padding-block:38px;border-top:1px solid var(--line);align-items:start}
+.tool:last-child{border-bottom:1px solid var(--line)}
+.tool.flip .txt{order:2}
+.head{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.head img{width:56px;height:56px}
+.head h3{font:800 24px/1.2 var(--f-display);letter-spacing:-.01em}
+.head p{font-size:13.5px;color:var(--ink-3);line-height:1.5;margin-top:2px}
+.ba{display:grid;gap:10px;margin-top:6px}
+.ba div{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;font-size:15px;color:var(--ink-2)}
+.ba dt,.ba .k{font:600 12px/1.9 var(--f-mono);color:var(--ink-3);letter-spacing:.06em}
+.res{margin-top:16px;border-radius:12px;padding:12px 16px;font-size:15px}
+.res b{font-weight:700;margin-right:6px}
+.t-amber .res{background:var(--amber-t)} .t-amber .res b{color:var(--amber)}
+.t-green .res{background:var(--green-t)} .t-green .res b{color:var(--green)}
+.t-sky .res{background:var(--sky-t)} .t-sky .res b{color:var(--sky)}
+.t-blue .res{background:var(--blue-t)} .t-blue .res b{color:var(--blue)}
+.t-violet .res{background:var(--violet-t)} .t-violet .res b{color:var(--violet)}
+.shot{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.shot img{width:100%}
+.shot figcaption{font-size:12.5px;color:var(--ink-3);padding:9px 14px;border-top:1px solid var(--line)}
+html:not([data-app="dark"]) .dk,html[data-app="dark"] .lt{display:none}
+@media(max-width:820px){.tool{grid-template-columns:1fr;gap:20px}.tool.flip .txt{order:0}}
+
+/* demo */
+.dtabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.dtab{display:inline-flex;align-items:center;gap:8px;font:600 14px/1 var(--f-body);color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 14px 8px 8px;cursor:pointer}
+.dtab img{width:24px;height:24px}
+.dtab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.win{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.win-bar{display:flex;align-items:center;gap:7px;padding:0 14px;height:34px;border-bottom:1px solid var(--line);background:var(--surface-2);font:600 12.5px var(--f-body);color:var(--ink-3)}
+.win-bar i{width:11px;height:11px;border-radius:50%;background:#FF5F57}
+.win-bar i:nth-child(2){background:#FEBC2E}.win-bar i:nth-child(3){background:#28C840}
+.win-bar b{margin-left:8px;font-weight:600}
+.win-body{position:relative;background:var(--surface)}
+.win-body img.shot-img{width:100%;cursor:pointer}
+.win-body iframe{display:block;width:100%;height:min(78vh,760px);min-height:520px;border:0;background:#0B1224}
+.dfoot{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin-top:14px}
+.dcap{font-size:15px;color:var(--ink-2);flex:1 1 320px;min-width:0}
+.dctl{display:flex;align-items:center;gap:12px}
+.dots{display:flex;gap:6px}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--blue)}
+.dbtn{font:600 14px/1 var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 14px;cursor:pointer}
+.dbtn.pri{background:var(--blue);border-color:var(--blue);color:var(--bg)}
+.dbtn[disabled]{opacity:.4;cursor:default}
+
+/* phy launcher */
+.phy{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:520px;background:var(--surface);color:var(--ink)}
+.phy-side{background:var(--surface-2);border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:14px}
+.phy-side img{width:44px;height:44px;border-radius:12px}
+.phy-side b{font:700 15px/1.2 var(--f-display)}
+.phy-side small{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}
+.phy-nav{margin-top:8px;display:grid;gap:4px}
+.phy-nav span{padding:8px 10px;border-radius:8px;font-size:13.5px;color:var(--ink-2)}
+.phy-nav span.on{background:color-mix(in srgb,var(--blue) 14%,transparent);color:var(--blue);font-weight:600}
+.phy-rate{all:unset;box-sizing:border-box;margin-top:auto;display:grid;gap:3px;position:relative;font-size:11.5px;line-height:1.6;color:var(--ink-2);cursor:pointer;border:1px solid var(--blue);border-radius:8px;padding:8px 10px;animation:glow 1.8s ease-in-out infinite}.phy-rate .dn{font-style:normal;color:var(--blue);margin-left:4px}.phy-rate em{position:absolute;right:6px;top:-9px;font:700 10.5px/1 var(--f-body);font-style:normal;background:var(--blue);color:var(--bg);border-radius:999px;padding:4px 7px}.phy-rate:hover,.phy-rate:focus-visible{background:var(--surface)}.phy-by{font-size:11.5px;color:var(--ink-3);margin-top:8px}
+.phy-fx-old{margin-top:auto;font-size:11.5px;color:var(--ink-3);line-height:1.7;border-top:1px solid var(--line);padding-top:10px}
+.phy-main{padding:26px 30px 24px}
+.phy-main h3{font:700 26px/1.1 var(--f-display);margin:0}
+.phy-main>p{margin:6px 0 16px;color:var(--ink-3);font-size:14px}
+.phy-grp{font:600 11.5px/1 var(--f-body);letter-spacing:.1em;color:var(--ink-3);margin:18px 0 6px;padding-top:14px;border-top:1px solid var(--line)}
+.phy-app{position:relative;display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:12px;padding:10px 12px;cursor:pointer;color:inherit;font:inherit;transition:background .15s,border-color .15s}
+.phy-app:hover,.phy-app:focus-visible{background:var(--surface-2);border-color:var(--blue);outline:0}
+.phy-app img{width:52px;height:52px;flex:none;position:relative;z-index:1}
+.phy-app .pulse{position:absolute;left:12px;top:50%;width:52px;height:52px;margin-top:-26px;border-radius:14px;border:2px solid var(--blue);animation:pulse 1.8s ease-out infinite;pointer-events:none}
+.phy-app:nth-of-type(2n) .pulse{animation-delay:.45s}
+.phy-app:nth-of-type(3n) .pulse{animation-delay:.9s}
+@keyframes pulse{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.7);opacity:0}}
+.phy-app b{display:block;font:700 17px/1.2 var(--f-display)}
+.phy-app span.t{display:block;font-size:13px;color:var(--ink-2)}
+.phy-app span.d{display:block;font-size:12.5px;color:var(--ink-3)}
+.phy-app .go{margin-left:auto;flex:none;font:600 12px/1 var(--f-body);color:var(--bg);background:var(--blue);border-radius:999px;padding:7px 11px;opacity:0;transform:translateX(-4px);transition:.15s}
+.phy-app:hover .go,.phy-app:focus-visible .go{opacity:1;transform:none}
+.phy-hand{position:absolute;right:78px;top:50%;font-size:26px;line-height:1;pointer-events:none;animation:tap 1.6s ease-in-out infinite;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+@keyframes tap{0%,100%{transform:translate(8px,6px) scale(1)}50%{transform:translate(-4px,-4px) scale(.88)}}
+.phy-tip{position:absolute;right:12px;top:-10px;background:var(--blue);color:var(--bg);font:700 11.5px/1 var(--f-body);padding:5px 9px;border-radius:999px;animation:bob 1.6s ease-in-out infinite;pointer-events:none;z-index:2}
+@keyframes bob{50%{transform:translateY(-3px)}}
+.dback{display:inline-flex;align-items:center;gap:8px;font:600 14px/1 var(--f-body);color:var(--blue);background:var(--surface);border:1px solid var(--blue);border-radius:999px;padding:9px 16px;cursor:pointer;margin-bottom:12px}
+.dback img{width:20px;height:20px;border-radius:5px}
+.dback[hidden]{display:none}
+.win-body .clk{position:absolute;right:18px;bottom:18px;pointer-events:none;background:var(--blue);color:var(--bg);font:700 13px/1 var(--f-body);padding:9px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);animation:bob 1.6s ease-in-out infinite}
+.dbtn.pri.hint{animation:glow 1.6s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--blue) 55%,transparent)}50%{box-shadow:0 0 0 8px transparent}}
+@media(prefers-reduced-motion:reduce){.pulse,.phy-hand,.phy-tip,.clk,.dbtn.pri.hint{animation:none!important}}
+@media(max-width:700px){.phy{grid-template-columns:1fr}.phy-side{padding:10px 14px;border-right:0;border-bottom:1px solid var(--line)}.phy-side>img,.phy-side>div,.phy-by{display:none}.phy-rate{margin-top:6px}.phy-nav{margin:0;grid-auto-flow:column;grid-template-columns:1fr 1fr}.phy-main{padding:18px 14px}.phy-app .d{display:none}.phy-hand{display:none}}
+.phy-set{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;font-size:13.5px;color:var(--ink-2);cursor:pointer;border:1px solid var(--blue);animation:glow 1.8s ease-in-out infinite}
+.phy-set:hover,.phy-set:focus-visible{background:var(--surface);color:var(--blue)}
+.phy-set em{font:700 10.5px/1 var(--f-body);font-style:normal;background:var(--blue);color:var(--bg);border-radius:999px;padding:4px 7px}
+.minbtn{cursor:pointer;animation:ring 1.6s ease-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(254,188,46,.9)}100%{box-shadow:0 0 0 9px rgba(254,188,46,0)}}
+.mintip{margin-left:auto;font:700 11px/1 var(--f-body);color:var(--bg);background:var(--blue);border-radius:999px;padding:5px 9px;animation:bob 1.6s ease-in-out infinite}
+.desk{position:relative;aspect-ratio:16/10;min-height:340px;overflow:hidden;background:radial-gradient(120% 90% at 20% 10%,#5B8DEF 0%,#3A5FB8 45%,#1E2A5A 100%)}
+.desk-bar{position:absolute;left:0;right:0;bottom:0;height:34px;background:rgba(15,20,40,.55);backdrop-filter:blur(6px)}
+.desk-note{position:absolute;left:18px;top:16px;color:#fff;font:600 13px/1.4 var(--f-body);background:rgba(0,0,0,.28);padding:8px 12px;border-radius:10px;max-width:46%}
+.desk-orb{position:absolute;right:20px;bottom:52px;width:270px;max-width:80%;display:block;border:0;background:none;padding:0;cursor:pointer}
+.desk-orb img{width:100%;display:block;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
+.desk-orb::after{content:'';position:absolute;right:0;top:50%;width:50px;height:50px;margin-top:-25px;border-radius:50%;border:2px solid #fff;animation:pulse 1.6s ease-out infinite;pointer-events:none}
+.desk-tip{position:absolute;right:24px;bottom:114px;background:var(--blue);color:var(--bg);font:700 12px/1 var(--f-body);padding:7px 11px;border-radius:999px;animation:bob 1.6s ease-in-out infinite;pointer-events:none}
+.desk-q{position:absolute;right:20px;bottom:112px;width:254px;max-width:80%}
+.desk-q img{width:100%;display:block}
+.desk-q button{position:absolute;left:3%;right:3%;border:0;background:transparent;cursor:pointer;border-radius:10px}
+.desk-q button:hover,.desk-q button:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+.desk-q button.hot{animation:glow 1.6s ease-in-out infinite;outline:2px solid #fff;outline-offset:-2px}
+@media(prefers-reduced-motion:reduce){.minbtn,.mintip,.desk-tip,.desk-orb::after,.hot{animation:none!important}}
+.hubimg{position:relative;line-height:0}
+.hubimg>img{width:100%;display:block;user-select:none}
+.hs{position:absolute;border:0;background:transparent;cursor:pointer;border-radius:12px;padding:0}
+.hs:hover,.hs:focus-visible{background:color-mix(in srgb,var(--blue) 12%,transparent);outline:2px solid var(--blue);outline-offset:-2px}
+.hs .ring{position:absolute;left:1.6%;top:50%;width:7%;aspect-ratio:1;margin-top:-3.5%;border:2px solid var(--blue);border-radius:22%;animation:pulse 1.8s ease-out infinite;pointer-events:none}
+.hs-mode{border-radius:10px}.win-body>.hs.hs-mode[data-mode]{animation:glow 1.6s ease-in-out infinite}
+.hs-min{border-radius:50%;animation:ring 1.6s ease-out infinite}
+.tip2{position:absolute;background:var(--blue);color:var(--bg);font:700 12px/1 var(--f-body);padding:6px 10px;border-radius:999px;pointer-events:none;white-space:nowrap;animation:bob 1.6s ease-in-out infinite}
+.hand2{position:absolute;font-size:28px;line-height:1;pointer-events:none;animation:tap 1.6s ease-in-out infinite;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+@media(max-width:700px){.tip2{font-size:10px;padding:4px 7px}.hand2{font-size:20px}}
+@media(prefers-reduced-motion:reduce){.hs .ring,.hs-min,.tip2,.hand2{animation:none!important}}
+/* widget cards */
+.wcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.wc{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.wvis{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;gap:12px;padding:18px;background:radial-gradient(120% 90% at 20% 10%,#5B8DEF 0%,#3A5FB8 45%,#1E2A5A 100%)}
+.wvis img{max-width:100%;height:auto;display:block;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
+.wvis.plain{background:var(--surface-2);padding:0}
+.wvis.plain img{width:100%;max-width:none;filter:none}
+.wc .wt{padding:18px 20px 22px}
+.wc h3{font:700 18px/1.25 var(--f-display);margin:0 0 8px}
+.wc p{margin:0;font-size:15px;color:var(--ink-2)}
+.wc a{display:inline-block;margin-top:12px;font:600 14px var(--f-body);color:var(--blue)}
+@media(max-width:900px){.wcards{grid-template-columns:1fr}.wvis{aspect-ratio:16/10}}
+/* calc & fit */
+.calc-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.calc{width:100%;border-collapse:collapse;font-size:14.5px;min-width:620px}
+.calc th,.calc td{padding:13px 16px;text-align:left;border-top:1px solid var(--line);vertical-align:top}
+.calc thead th{border-top:0;font:600 12.5px var(--f-body);color:var(--ink-3);background:var(--surface-2)}
+.calc td:last-child,.calc th:last-child{text-align:right;white-space:nowrap}
+.calc tfoot td{font-weight:700;background:var(--surface-2)}
+.calc small{display:block;color:var(--ink-3);font-size:12.5px;margin-top:2px}
+.calc-note{margin:12px 2px 0;font-size:13.5px;color:var(--ink-3)}
+/* hub */
+.hub{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:34px;align-items:start}
+.pts{display:grid;gap:0}
+.pts li{padding:16px 0;border-top:1px solid var(--line)}
+.pts li:first-child{border-top:0;padding-top:0}
+.pts b{display:block;font-size:16px}
+.pts span{font-size:15px;color:var(--ink-2)}
+@media(max-width:820px){.hub{grid-template-columns:1fr}}
+
+/* method */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-block:1px solid var(--line)}
+.steps li{padding:22px 20px 22px 0}
+.steps li+li{padding-left:20px;border-left:1px solid var(--line)}
+.steps b{display:block;font:700 17px var(--f-display);margin-bottom:6px}
+.steps span{font-size:14.5px;color:var(--ink-2)}
+@media(max-width:820px){.steps{grid-template-columns:1fr 1fr}.steps li,.steps li+li{padding:18px 16px 18px 0;border-left:0;border-top:1px solid var(--line)}.steps li:nth-child(-n+2){border-top:0}}
+@media(max-width:480px){.steps{grid-template-columns:1fr}.steps li:nth-child(2){border-top:1px solid var(--line)}}
+.stack{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.stack li{font:500 13px var(--f-mono);padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink-2)}
+
+.note{font-size:13px;color:var(--ink-3);padding-block:56px;max-width:46em}
+</style>
+
+<header class="bar">
+  <div class="wrap">
+    <nav aria-label="sections">
+      <a href="#tools"><span lang="ko">자동화 도구</span><span lang="en">Tools</span></a>
+      <a href="#demo"><span lang="ko">직접 눌러보기</span><span lang="en">Try it</span></a>
+      <a href="#hub"><span lang="ko">PHY</span><span lang="en">PHY</span></a>
+      <a href="#method"><span lang="ko">일하는 방식</span><span lang="en">Approach</span></a>
+    </nav>
+    <div class="ctrls">
+      <div class="seg" role="group" aria-label="Language">
+        <button id="b-ko" type="button" aria-pressed="true">KO</button>
+        <button id="b-en" type="button" aria-pressed="false">EN</button>
+      </div>
+      <div class="seg" role="group" aria-label="Theme">
+        <button id="b-light" type="button" aria-pressed="false">☀</button>
+        <button id="b-dark" type="button" aria-pressed="false">☾</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <p class="who"><b>박해윤 · Haeyoon Park</b><span class="eyebrow"><span lang="ko">해외영업관리</span><span lang="en">Overseas Sales Operations</span></span></p>
+    <h1>
+      <span lang="ko">매달 반복되던 서류 작업을, <em>직접 만든 프로그램</em>으로 바꿨습니다.</span>
+      <span lang="en">I replaced monthly paperwork with <em>programs I built myself</em>.</span>
+    </h1>
+    <p class="lede">
+      <span lang="ko">해외영업관리 실무에서 손이 많이 가고 실수가 잦던 업무를 직접 자동화하고, 매출 현황판까지 만들었습니다. 다섯 가지 도구는 Professional Hub for You(PHY) 하나로 묶어 설치 파일 한 개로 사내에 배포했습니다.</span>
+      <span lang="en">I picked the error-prone, time-consuming tasks in overseas sales operations, automated them, and added a sales dashboard. The five tools ship together as Professional Hub for You (PHY), one installer for the whole team.</span>
+    </p>
+    <figure class="reel">
+      <video lang="ko" controls preload="metadata" playsinline poster="m/poster_KO.jpg"><source src="m/reel_KO.mp4" type="video/mp4"></video>
+      <video lang="en" controls preload="metadata" playsinline poster="m/poster_EN.jpg"><source src="m/reel_EN.mp4" type="video/mp4"></video>
+    </figure>
+    <p class="reel-cap"><span lang="ko">60초 소개 영상 (소리 포함). 화면은 실제 프로그램을 가상 데이터로 실행해 캡처했습니다.</span><span lang="en">60-second overview with sound. Screens are the real programs running on sample data.</span></p>
+  </div>
+
+  <div class="nums">
+    <div class="num"><b>~90<small>h/yr</small></b><span lang="ko">반복 업무 시간 절감. 근무일로 약 11일 <a href="#calc" style="color:var(--blue);white-space:nowrap">계산 보기</a></span><span lang="en">of repetitive work saved, about 11 working days <a href="#calc" style="color:var(--blue);white-space:nowrap">see the math</a></span></div>
+    <div class="num"><b>5 → 1</b><span lang="ko">업무 도구 다섯 개를 프로그램 하나로 묶어 설치 파일 한 개로 배포</span><span lang="en">five tools merged into one program, shipped as a single installer</span></div>
+    <div class="num"><b>9 → 0</b><span lang="ko">선적서류 문자 인식 오류. 실제 서류 55건으로 테스트하며 개선</span><span lang="en">OCR errors on shipping documents, fixed by testing on 55 real files</span></div>
+  </div>
+
+  <section id="tools">
+    <div class="tools-top">
+      <div class="sec-h" style="margin:0">
+        <p class="eyebrow">5 tools</p>
+        <h2><span lang="ko">무엇을 바꿨나</span><span lang="en">What changed</span></h2>
+        <p><span lang="ko">도구마다 원래 어떻게 했는지, 무엇을 자동화했는지, 그래서 무엇이 달라졌는지를 정리했습니다.</span><span lang="en">For each tool: how the work was done, what I automated, and what that changed.</span></p>
+      </div>
+      <div class="seg" role="group" aria-label="App screen theme">
+        <button data-appbtn="light" type="button" aria-pressed="true"><span lang="ko">앱 화면 라이트</span><span lang="en">App light</span></button>
+        <button data-appbtn="dark" type="button" aria-pressed="false"><span lang="ko">앱 화면 다크</span><span lang="en">App dark</span></button>
+      </div>
+    </div>
+    <div style="height:28px"></div>
+
+    <article class="tool t-violet">
+      <div class="txt">
+        <div class="head"><img src="m/ic_salesdashboard.webp" alt="" width="56" height="56"><div><h3>Sales Dashboard</h3><p><span lang="ko">국내·해외 매출 현황판 · ERP 매출 데이터 기반</span><span lang="en">Domestic and overseas sales view · built on ERP sales data</span></p></div></div>
+        <dl class="ba" style="margin:0">
+          <div><dt class="k"><span lang="ko">이전</span><span lang="en">BEFORE</span></dt><dd style="margin:0"><span lang="ko">ERP 매출 원본을 엑셀 현황판에 옮겨 넣고 나서야 국내·해외 매출을 볼 수 있었음</span><span lang="en">Sales data had to be pasted from the ERP into an Excel sheet before anyone could see domestic and overseas numbers</span></dd></div>
+          <div><dt class="k"><span lang="ko">이후</span><span lang="en">AFTER</span></dt><dd style="margin:0"><span lang="ko">ERP에서 받은 매출 데이터로 현황판이 자동으로 만들어집니다. 목표 달성률, 최근 매출 10건, 큰 건 Top 5, 이익, 거래처 변화, 모델별 매출이 한 화면에 나오고, PHY가 미리 최신 데이터를 받아 두어 열면 바로 보입니다</span><span lang="en">The dashboard builds itself from ERP sales data: target progress, latest 10 sales, top 5 deals, profit, customer changes and sales by model on one screen. PHY fetches fresh data in the background, so it opens instantly</span></dd></div>
+        </dl>
+        <p class="res"><b><span lang="ko">효과</span><span lang="en">Result</span></b><span lang="ko">월간 매출 보고 준비 10~20분 → 자동. 엑셀 수작업의 정확도 문제와 재확인 시간 제거</span><span lang="en">Monthly report prep of 10 to 20 minutes becomes automatic. No more manual-paste errors or re-checking</span></p>
+      </div>
+      <figure class="shot"><img src="m/dash.webp" alt="Sales Dashboard" width="2000" height="1250" loading="lazy"><figcaption><span lang="ko">가상 데이터 · 해외 영역 요약</span><span lang="en">Sample data · overseas summary</span></figcaption></figure>
+    </article>
+
+    <article class="tool flip t-amber">
+      <div class="txt">
+        <div class="head"><img src="m/ic_certificategenerator.webp" alt="" width="56" height="56"><div><h3>Certificate Generator</h3><p><span lang="ko">해외 대리점 교육 수료증 발급 · 연 약 15회, 회당 2~10명 이상</span><span lang="en">Training certificates for overseas dealers · about 15 sessions a year, 2 to 10+ people each</span></p></div></div>
+        <dl class="ba" style="margin:0">
+          <div><dt class="k"><span lang="ko">이전</span><span lang="en">BEFORE</span></dt><dd style="margin:0"><span lang="ko">PowerPoint에서 수료증 번호를 일일이 대조해 입력하고, 한 파일로 묶여 나온 PDF를 한 장씩 분리해 "대리점명_수료인명"으로 다시 저장</span><span lang="en">Certificate numbers checked and typed by hand in PowerPoint, then one combined PDF split page by page and renamed "dealer_name_trainee"</span></dd></div>
+          <div><dt class="k"><span lang="ko">이후</span><span lang="en">AFTER</span></dt><dd style="margin:0"><span lang="ko">교육 명단 Excel을 고르면 번호 부여, 수료증 작성, 수료인별 PDF 저장까지 한 번에</span><span lang="en">Pick the attendee Excel file and it assigns numbers, fills the certificates and saves one PDF per person</span></dd></div>
+        </dl>
+        <p class="res"><b><span lang="ko">효과</span><span lang="en">Result</span></b><span lang="ko">수료증 1장 약 10분 → 2분 이내. 번호 대조와 파일명 실수 제거. 인원이 많을수록 절감 폭 증가</span><span lang="en">About 10 minutes per certificate down to under 2. No number or filename mistakes, and the more attendees, the bigger the saving</span></p>
+      </div>
+      <figure class="shot"><img class="lt" src="m/cert.webp" alt="Certificate Generator" width="1800" height="1440" loading="lazy"><img class="dk" src="m/cert_dk.webp" alt="Certificate Generator, dark" width="1800" height="1440" loading="lazy"><figcaption><span lang="ko">수료인 명단을 불러온 화면 (가상 데이터)</span><span lang="en">Recipient list loaded (sample data)</span></figcaption></figure>
+    </article>
+
+    <article class="tool t-blue">
+      <div class="txt">
+        <div class="head"><img src="m/ic_documentstudio.webp" alt="" width="56" height="56"><div><h3>Document Studio</h3><p><span lang="ko">세관 제출용 사유서 작성 (무상·반입·재수출·정정) · 월 약 5건</span><span lang="en">Customs explanation letters (free of charge, import, re-export, correction) · about 5 a month</span></p></div></div>
+        <dl class="ba" style="margin:0">
+          <div><dt class="k"><span lang="ko">이전</span><span lang="en">BEFORE</span></dt><dd style="margin:0"><span lang="ko">유형마다 이전 문서를 찾아 복사해 고쳐 쓰는 방식. 건당 약 10분, 서식이 조금씩 달라짐</span><span lang="en">Find an earlier document, copy it and edit. About 10 minutes each, and the format drifted over time</span></dd></div>
+          <div><dt class="k"><span lang="ko">이후</span><span lang="en">AFTER</span></dt><dd style="margin:0"><span lang="ko">유형을 고르고 칸만 채우면 정해진 양식의 Word·PDF가 바로 생성</span><span lang="en">Choose the type, fill the fields, and a Word and PDF file in the fixed format is produced</span></dd></div>
+        </dl>
+        <p class="res"><b><span lang="ko">효과</span><span lang="en">Result</span></b><span lang="ko">건당 약 10분 → 3분 이내. 누가 작성해도 같은 양식</span><span lang="en">About 10 minutes per letter down to under 3. Same format no matter who writes it</span></p>
+      </div>
+      <figure class="shot"><img class="lt" src="m/ds.webp" alt="Document Studio" width="1800" height="1440" loading="lazy"><img class="dk" src="m/ds_dk.webp" alt="Document Studio, dark" width="1800" height="1440" loading="lazy"><figcaption><span lang="ko">사유서 입력 양식 (가상 데이터)</span><span lang="en">Letter form (sample data)</span></figcaption></figure>
+    </article>
+
+    <article class="tool flip t-sky">
+      <div class="txt">
+        <div class="head"><img src="m/ic_splitdocs.webp" alt="" width="56" height="56"><div><h3>SplitDocs</h3><p><span lang="ko">선적서류 스캔 PDF 거래처별 분리 · 월 1회, 회당 약 15건</span><span lang="en">Splitting scanned shipping PDFs by customer · monthly, about 15 sets</span></p></div></div>
+        <dl class="ba" style="margin:0">
+          <div><dt class="k"><span lang="ko">이전</span><span lang="en">BEFORE</span></dt><dd style="margin:0"><span lang="ko">여러 거래처 서류가 섞인 스캔 PDF를 눈으로 보며 결의전표 기준으로 나누고, 거래처명과 날짜로 파일명을 직접 입력</span><span lang="en">Scanned PDFs mixed from several customers, split by eye at each voucher page, files renamed by hand with customer and date</span></dd></div>
+          <div><dt class="k"><span lang="ko">이후</span><span lang="en">AFTER</span></dt><dd style="margin:0"><span lang="ko">문자 인식(OCR)으로 결의전표를 찾아 거래처별로 자동 분리하고, 거래처 목록의 정식 명칭으로 파일명을 만듭니다. 애매한 건은 "검토필요"로 따로 표시</span><span lang="en">Text recognition (OCR) finds each voucher, splits by customer and names files from the customer list. Unclear pages are flagged "review needed"</span></dd></div>
+        </dl>
+        <p class="res"><b><span lang="ko">효과</span><span lang="en">Result</span></b><span lang="ko">세트당 약 5분 → 여러 세트를 한 번에 처리. 실제 서류 55건 테스트에서 인식 오류 9건을 찾아 0건으로</span><span lang="en">About 5 minutes per set, now many sets in one run. Testing 55 real documents exposed 9 OCR errors; all fixed</span></p>
+      </div>
+      <figure class="shot"><img class="lt" src="m/sd.webp" alt="SplitDocs" width="1800" height="1440" loading="lazy"><img class="dk" src="m/sd_dk.webp" alt="SplitDocs, dark" width="1800" height="1440" loading="lazy"><figcaption><span lang="ko">분리 진행 화면 (가상 데이터)</span><span lang="en">Processing view (sample data)</span></figcaption></figure>
+    </article>
+
+    <article class="tool t-green">
+      <div class="txt">
+        <div class="head"><img src="m/ic_picipl.webp" alt="" width="56" height="56"><div><h3>PI / CI / PL Format</h3><p><span lang="ko">수출 인보이스·패킹리스트 작성 · 월 15~20건</span><span lang="en">Export invoices and packing lists · 15 to 20 a month</span></p></div></div>
+        <dl class="ba" style="margin:0">
+          <div><dt class="k"><span lang="ko">이전</span><span lang="en">BEFORE</span></dt><dd style="margin:0"><span lang="ko">건마다 대리점 등급(등급별 단가), 주소, 이전 거래의 인코텀즈를 따로 확인해 입력. 건당 20~30분, 통화를 잘못 적어 대금을 환불 후 재수취한 사고도 있었음</span><span lang="en">Dealer grade (grade-based prices), address and previous Incoterms looked up and typed per order. 20 to 30 minutes each; one wrong currency once meant a refund and re-collection</span></dd></div>
+          <div><dt class="k"><span lang="ko">이후</span><span lang="en">AFTER</span></dt><dd style="margin:0"><span lang="ko">대리점 정보가 자동 반영되고, PI를 저장하면 PI 번호가 CI로 넘어가 PI → CI → PL 순서로 이어서 작성 (엑셀 매크로)</span><span lang="en">Dealer data fills in automatically. Saving the PI carries its number to the CI, then the PL (엑셀 매크로)</span></dd></div>
+        </dl>
+        <p class="res"><b><span lang="ko">효과</span><span lang="en">Result</span></b><span lang="ko">건당 20~30분 → 약 5분. 수기 입력으로 생기던 금액·조건 오류의 원인 제거</span><span lang="en">20 to 30 minutes down to about 5, and the source of manual amount and terms errors is gone</span></p>
+      </div>
+      <figure class="shot"><img src="m/pi.webp" alt="Proforma invoice" width="1160" height="1065" loading="lazy"><figcaption><span lang="ko">PI 화면 (가상 거래처와 주소)</span><span lang="en">PI sheet (fictional dealer and address)</span></figcaption></figure>
+    </article>
+  </section>
+
+  <section id="calc">
+    <div class="sec-h">
+      <p class="eyebrow">Math</p>
+      <h2><span lang="ko">절감 시간은 이렇게 계산했습니다</span><span lang="en">How the saved hours add up</span></h2>
+      <p><span lang="ko">도구마다 실제 업무 빈도와 이전, 이후 소요 시간을 곱해 한 해 기준으로 합쳤습니다. 범위로 기억하는 값은 중간값을, PI/CI/PL은 보수적으로 하한을 썼습니다.</span><span lang="en">For each tool: real task frequency times the time before and after, summed over a year. Where I remember a range I used the midpoint, and for PI/CI/PL the lower end to stay conservative.</span></p>
+    </div>
+    <div class="calc-wrap"><table class="calc">
+      <thead><tr><th><span lang="ko">도구</span><span lang="en">Tool</span></th><th><span lang="ko">빈도</span><span lang="en">Frequency</span></th><th><span lang="ko">1회당 절감</span><span lang="en">Saved each time</span></th><th><span lang="ko">연간</span><span lang="en">Per year</span></th></tr></thead>
+      <tbody>
+        <tr><td>Sales Dashboard</td><td><span lang="ko">월 1회</span><span lang="en">monthly</span></td><td><span lang="ko">약 15분 (10~20분의 중간)</span><span lang="en">about 15 min (midpoint of 10 to 20)</span></td><td>3h</td></tr>
+        <tr><td>Certificate Generator</td><td><span lang="ko">연 15회 × 6명<small>회당 2~10명의 중간</small></span><span lang="en">15 sessions × 6 people<small>midpoint of 2 to 10</small></span></td><td><span lang="ko">장당 8분 (10분 → 2분)</span><span lang="en">8 min per certificate (10 to 2)</span></td><td>12h</td></tr>
+        <tr><td>Document Studio</td><td><span lang="ko">월 5건</span><span lang="en">5 per month</span></td><td><span lang="ko">건당 7분 (10분 → 3분)</span><span lang="en">7 min each (10 to 3)</span></td><td>7h</td></tr>
+        <tr><td>SplitDocs</td><td><span lang="ko">월 1회 × 15건<small>세트당 약 5분이던 수작업 75분</small></span><span lang="en">monthly × 15 sets<small>about 5 min each by hand, 75 min</small></span></td><td><span lang="ko">60분<small>결과 확인 15분은 제외</small></span><span lang="en">60 min<small>minus 15 min to check results</small></span></td><td>12h</td></tr>
+        <tr><td>PI / CI / PL Format</td><td><span lang="ko">월 15건<small>15~20건 중 하한</small></span><span lang="en">15 per month<small>lower end of 15 to 20</small></span></td><td><span lang="ko">건당 20분 (25분 → 5분)</span><span lang="en">20 min each (25 to 5)</span></td><td>60h</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="3"><span lang="ko">합계 약 94시간. 하루 8시간 기준 11.7일, 내림하여 약 11일</span><span lang="en">Total about 94 hours. At 8 hours a day that is 11.7 days, rounded down to about 11</span></td><td>94h</td></tr></tfoot>
+    </table></div>
+    <p class="calc-note"><span lang="ko">기억에 의존한 추정치이며, 면접에서는 위 계산 과정 그대로 설명할 수 있습니다.</span><span lang="en">These are estimates from memory, and I can walk through the same calculation in an interview.</span></p>
+  </section>
+
+  <section id="demo">
+    <div class="sec-h">
+      <p class="eyebrow">Demo</p>
+      <h2><span lang="ko">직접 눌러보기</span><span lang="en">Try it yourself</span></h2>
+      <p><span lang="ko">실제 PHY 메인 화면입니다. 깜박이는 앱을 눌러 실행해 보세요. 실행 후에는 화면을 눌러 다음 단계로 넘어갑니다. Sales Dashboard는 실제 현황판이 그대로 움직입니다. 모든 데이터는 가상입니다.</span><span lang="en">A walk-through built from the real program screens. This is the PHY main screen. Click a pulsing app to launch it, then click the screen to step through. The Sales Dashboard is the real page, fully interactive. All data is fictional.</span></p>
+    </div>
+    <div class="tools-top" style="margin-bottom:16px">
+      <button class="dback" id="dback" type="button" hidden><img src="m/hub.webp" alt="" style="display:none"><span lang="ko">← PHY 메인으로</span><span lang="en">← Back to PHY</span></button>
+      <div class="seg" role="group" aria-label="App screen theme">
+        <button data-appbtn="light" type="button" aria-pressed="true"><span lang="ko">라이트</span><span lang="en">Light</span></button>
+        <button data-appbtn="dark" type="button" aria-pressed="false"><span lang="ko">다크</span><span lang="en">Dark</span></button>
+      </div>
+    </div>
+    <div class="win">
+      <div class="win-bar"><i></i><i></i><i></i><b id="dtitle"></b></div>
+      <div class="win-body" id="dbody"></div>
+    </div>
+    <div class="dfoot">
+      <p class="dcap" id="dcap" aria-live="polite"></p>
+      <div class="dctl" id="dctl">
+        <div class="dots" id="ddots"></div>
+        <button class="dbtn" id="dprev" type="button"><span lang="ko">이전</span><span lang="en">Back</span></button>
+        <button class="dbtn pri" id="dnext" type="button"><span lang="ko">다음 →</span><span lang="en">Next →</span></button>
+      </div>
+    </div>
+  </section>
+
+  <section id="hub">
+    <div class="sec-h">
+      <p class="eyebrow">PHY</p>
+      <h2><span lang="ko">하나로 묶어서, 누구나 쓰게</span><span lang="en">One launcher, usable by anyone</span></h2>
+      <p><span lang="ko">도구가 늘어날수록 "어디 있는지, 어떻게 켜는지"가 또 다른 일이 됩니다. 그래서 다섯 도구를 PHY 하나로 모으고, 설치부터 사용까지 혼자서도 할 수 있게 만들었습니다.</span><span lang="en">The more tools there are, the more "where is it and how do I start it" becomes work of its own. So all five live in PHY, and setup and daily use work without anyone's help.</span></p>
+    </div>
+    <div class="hub">
+      <figure class="shot"><img src="m/hub.webp" alt="PHY" width="2080" height="1520" loading="lazy"><figcaption><span lang="ko">PHY 실행 화면. 목록에서 누르면 해당 프로그램이 실행됩니다.</span><span lang="en">PHY home. Click a tool to launch it.</span></figcaption></figure>
+      <ul class="pts">
+        <li><b><span lang="ko">설치 파일 하나</span><span lang="en">One installer</span></b><span lang="ko">프로그램, 사용 설명서, 소개 영상을 한 번에 설치하고, 제거하면 깔끔하게 정리</span><span lang="en">Programs, manual and intro video install together and uninstall cleanly</span></li>
+        <li><b><span lang="ko">담당자가 없어도 돌아가게</span><span lang="en">Runs without me</span></b><span lang="ko">Office 라이선스 문제처럼 사용자가 원인을 찾기 어려운 오류는 프로그램이 이유를 먼저 알려 줍니다. 해마다 바뀌는 값은 자동으로 반영됩니다</span><span lang="en">When something hard to trace goes wrong, such as an Office licensing problem, the program explains why first. Values that change yearly update themselves</span></li>
+        <li><b><span lang="ko">인수인계를 전제로</span><span lang="en">Built for handover</span></b><span lang="ko">거래처 목록 갱신 방법과 문제 해결 방법까지 설명서에 정리해, 프로그램 안에서 바로 열어 볼 수 있음</span><span lang="en">The manual covers customer DB updates and troubleshooting, and opens inside the app</span></li>
+        <li><b><span lang="ko">한글 검색, 단축키, 환율 위젯</span><span lang="en">Search, hotkey, rate widget</span></b><span lang="ko">Ctrl+Alt+O로 프로그램과 즐겨찾기를 한글로 바로 검색. 최소화해도 위젯이 남아 한 번에 실행 (아래 Widget 참고)</span><span lang="en">Ctrl+Alt+O searches programs and favorites (Korean input supported). Minimized, a widget stays on screen for one-click launch (see Widget below)</span></li>
+        <li><b><span lang="ko">라이트·다크 모드</span><span lang="en">Light and dark</span></b><span lang="ko">PHY와 모든 앱이 같은 테마를 따름</span><span lang="en">PHY and every app follow the same theme</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="widget">
+    <div class="sec-h">
+      <p class="eyebrow">Widget</p>
+      <h2><span lang="ko">창을 닫아도 곁에 남는 도구</span><span lang="en">Still within reach when the window is gone</span></h2>
+      <p><span lang="ko">PHY를 최소화해도 화면 구석에 작은 위젯이 남아, 프로그램 실행과 환율 확인이 한 번의 클릭으로 끝납니다.</span><span lang="en">Minimize PHY and a small widget stays on screen, so launching a program or checking the rate takes one click.</span></p>
+    </div>
+    <div class="wcards">
+      <article class="wc">
+        <div class="wvis"><img src="m/wg_quick.webp" alt="" width="254" height="240" style="max-width:62%"></div>
+        <div class="wt"><h3><span lang="ko">최소화 위젯</span><span lang="en">Minimized widget</span></h3>
+        <p><span lang="ko">PHY를 최소화하면 화면 오른쪽 아래에 작은 위젯이 남습니다. 한 번 누르면 프로그램과 즐겨찾기 목록이 열려 바로 실행할 수 있고, 끌어서 원하는 곳으로 옮길 수 있습니다.</span><span lang="en">Minimize PHY and a small widget stays at the bottom right. One click opens a list of programs and favorites to launch, and it can be dragged anywhere.</span></p>
+        <a href="#demo"><span lang="ko">데모에서 눌러보기 →</span><span lang="en">Try it in the demo →</span></a></div>
+      </article>
+      <article class="wc">
+        <div class="wvis"><img src="m/wg_orb.webp" alt="" width="540" height="102"></div>
+        <div class="wt"><h3><span lang="ko">환율 띠와 알림</span><span lang="en">Rate strip and alerts</span></h3>
+        <p><span lang="ko">위젯 옆에 USD, EUR 환율과 전일 대비 방향이 표시됩니다. "달러 1,300원 이하" 같은 알림을 정해 두면 기준에 닿았을 때 위젯 위에 알림이 뜹니다.</span><span lang="en">Next to the widget, USD and EUR show with the direction versus the previous day. Set an alert such as "USD at or below 1,300" and a notice appears above the widget when it is reached.</span></p></div>
+      </article>
+      <article class="wc">
+        <div class="wvis plain"><img src="demo/rate.webp" alt="" width="1400" height="1342" loading="lazy"></div>
+        <div class="wt"><h3><span lang="ko">환율 추이와 계산기</span><span lang="en">Rate chart and calculator</span></h3>
+        <p><span lang="ko">왼쪽 아래 환율 카드를 누르면 서울외국환중개 매매기준율 추이를 1개월~1년 그래프로 보고, 계산기로 바로 환산합니다.</span><span lang="en">Click the rate card at the bottom left to see the Seoul Money Brokerage base rate from one month to one year, and convert in the calculator.</span></p>
+        <a href="#demo"><span lang="ko">데모에서 눌러보기 →</span><span lang="en">Try it in the demo →</span></a></div>
+      </article>
+    </div>
+  </section>
+
+
+  <section id="fit">
+    <div class="sec-h">
+      <p class="eyebrow">Next</p>
+      <h2><span lang="ko">이 경험을 이렇게 쓰겠습니다</span><span lang="en">How I would use this in the job</span></h2>
+      <p><span lang="ko">영업관리, 해외영업지원 업무에서 먼저 하고 싶은 일입니다.</span><span lang="en">What I would start with in sales operations and overseas sales support.</span></p>
+    </div>
+    <ul class="steps">
+      <li><b><span lang="ko">반복 서류 표준화</span><span lang="en">Standardize paperwork</span></b><span lang="ko">PI, CI, PL, 통관 서류처럼 매달 반복되는 문서를 먼저 정리해, 담당자가 바뀌어도 같은 품질로 나오게 하겠습니다.</span><span lang="en">Start with monthly documents such as PI, CI, PL and customs papers, so quality stays the same when the person changes.</span></li>
+      <li><b><span lang="ko">매출 현황 한눈에</span><span lang="en">Sales at a glance</span></b><span lang="ko">매출, 미수, 거래처 변화를 원본 데이터에서 바로 보는 현황판으로 만들어 월간 보고 준비 시간을 줄이겠습니다.</span><span lang="en">Build a dashboard straight from source data for sales, receivables and customer changes, cutting monthly report prep.</span></li>
+      <li><b><span lang="ko">회사 규정 안에서</span><span lang="en">Within company rules</span></b><span lang="ko">시스템과 보안 규정을 먼저 확인하고, 회사가 허용한 방법으로만 자동화하겠습니다.</span><span lang="en">Check the systems and security rules first, and automate only through what the company allows.</span></li>
+      <li><b><span lang="ko">작게 시작해 정착</span><span lang="en">Start small, make it stick</span></b><span lang="ko">한 업무로 시작해 실제 서류로 검증하고, 설명서까지 남겨 동료가 스스로 쓰게 하겠습니다.</span><span lang="en">Begin with one task, verify on real documents, and leave a manual so colleagues can use it on their own.</span></li>
+    </ul>
+  </section>
+
+  <section id="method">
+    <div class="sec-h">
+      <p class="eyebrow">Approach</p>
+      <h2><span lang="ko">일하는 방식</span><span lang="en">How I work</span></h2>
+      <p><span lang="ko">개발자가 아닌 실무자로서, 도구보다 업무의 불편함에서 출발했습니다.</span><span lang="en">I am an operations person, not a developer, so I start from the pain in the work, not from the tool.</span></p>
+    </div>
+    <ul class="steps">
+      <li><b><span lang="ko">불편함 찾기</span><span lang="en">Find the pain</span></b><span lang="ko">매달 반복되고, 실수 한 번이 비용으로 이어지는 업무부터 골랐습니다.</span><span lang="en">Start with monthly work where one mistake costs money.</span></li>
+      <li><b><span lang="ko">직접 만들기</span><span lang="en">Build it</span></b><span lang="ko">필요한 기술은 업무를 해결하는 데 필요한 만큼 익혀 적용했습니다.</span><span lang="en">Learn only as much as the job needs, then apply it.</span></li>
+      <li><b><span lang="ko">실제 서류로 검증</span><span lang="en">Test on real files</span></b><span lang="ko">실제 서류로 돌려 실패 사례를 모으고, 오류가 없어질 때까지 고쳤습니다.</span><span lang="en">Run real documents, collect failures, fix until none are left.</span></li>
+      <li><b><span lang="ko">팀이 쓰게 배포</span><span lang="en">Ship to the team</span></b><span lang="ko">설치 파일과 설명서까지 만들어 사내 공유 드라이브로 배포했고, 같은 업무를 하는 동료가 직접 내려받아 사용했습니다.</span><span lang="en">Installer and manual on the shared drive; colleagues doing the same work downloaded and use it.</span></li>
+    </ul>
+    <ul class="stack" aria-label="tools used">
+      <li>Python</li><li>PySide6 (Qt)</li><li>Excel VBA</li><li>PowerPoint · Excel automation</li><li>OCR (PaddleOCR)</li><li>Inno Setup</li><li>Windows API</li><li>HTML · JavaScript</li>
+    </ul>
+  </section>
+
+  <section style="padding-top:0">
+    <p class="note"><span lang="ko">시간 수치는 실제 업무 빈도와 소요 시간을 바탕으로 한 추정치입니다. 화면의 거래처명, 사람 이름, 파일은 모두 가상 데이터이며, 회사 내부 정보는 제외하고 구성했습니다.</span><span lang="en">Time figures are estimates from actual task frequency and duration. Customer names, people and files on screen are all sample data, and internal company information is excluded.</span></p>
+  </section>
+</main>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var redraw=function(){if(window.__drawDemo)window.__drawDemo()};
+  function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function pause(){document.querySelectorAll('video').forEach(function(v){v.pause()})}
+  function setLang(l,persist){
+    root.setAttribute('data-lang',l);root.lang=l;
+    document.getElementById('b-ko').setAttribute('aria-pressed',l==='ko');
+    document.getElementById('b-en').setAttribute('aria-pressed',l==='en');
+    document.title=l==='ko'?'박해윤 업무 자동화 포트폴리오':'Haeyoon Park Automation Portfolio';
+    if(persist){save('lang',l);pause()}
+    redraw();
+  }
+  function setTheme(t,persist){
+    if(t){root.setAttribute('data-theme',t)}else{root.removeAttribute('data-theme')}
+    document.getElementById('b-light').setAttribute('aria-pressed',t==='light');
+    document.getElementById('b-dark').setAttribute('aria-pressed',t==='dark');
+    if(persist)save('theme',t||'');
+  }
+  function setApp(a,persist){
+    root.setAttribute('data-app',a);
+    document.querySelectorAll('[data-appbtn]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-appbtn')===a)});
+    if(persist)save('app',a);
+    redraw();
+  }
+  var nav=(navigator.language||'ko').toLowerCase();
+  setLang(load('lang')||(nav.indexOf('ko')===0?'ko':'en'),false);
+  var th=load('theme');setTheme(th==='light'||th==='dark'?th:null,false);
+  setApp(load('app')==='dark'?'dark':'light',false);
+  document.getElementById('b-ko').onclick=function(){setLang('ko',true)};
+  document.getElementById('b-en').onclick=function(){setLang('en',true)};
+  document.getElementById('b-light').onclick=function(){setTheme('light',true)};
+  document.getElementById('b-dark').onclick=function(){setTheme('dark',true)};
+  document.querySelectorAll('[data-appbtn]').forEach(function(b){b.onclick=function(){setApp(b.getAttribute('data-appbtn'),true)}});
+
+  /* demo */
+  var DEMO=[
+    {id:'dash',icon:'ic_salesdashboard',title:'Sales Dashboard',live:'demo/dashboard.html',
+     cap:{ko:'해외, 국내, 전체와 연도를 바꿔 보세요. 최근 매출, 큰 건 Top 5, 이익, 거래처 변화가 함께 바뀝니다.',en:'Switch overseas, domestic, all and the year. Recent sales, top deals, profit and customer changes all follow.'}},
+    {id:'cert',icon:'ic_certificategenerator',title:'Certificate Generator',dark:true,steps:[
+      {img:'cert_source',ko:'교육 명단 Excel과 저장 폴더를 고릅니다.',en:'Pick the attendee Excel file and an output folder.'},
+      {img:'cert_recipients',ko:'수료증을 발급할 사람을 체크합니다. 번호는 자동으로 붙습니다.',en:'Tick who gets a certificate. Numbers are assigned automatically.'},
+      {img:'cert_generate',ko:'수료증 PPT와 사람별 PDF가 한 번에 저장됩니다.',en:'The PPT and one PDF per person are saved in one go.'}]},
+    {id:'ds',icon:'ic_documentstudio',title:'Document Studio',dark:true,steps:[
+      {img:'ds_empty',ko:'만들 사유서 유형을 고릅니다. 반입, 정정, 무상, 재수출.',en:'Choose the letter type: import, correction, free of charge, re-export.'},
+      {img:'ds_form',ko:'칸을 채우고 DOCX 또는 PDF로 저장합니다. 양식은 항상 같습니다.',en:'Fill the fields and save as DOCX or PDF. The format never drifts.'}]},
+    {id:'sd',icon:'ic_splitdocs',title:'SplitDocs',dark:true,steps:[
+      {img:'sd_source',ko:'스캔 PDF와 결과 폴더를 고릅니다.',en:'Pick the scanned PDF and a result folder.'},
+      {img:'sd_options',ko:'결의전표 위치와 분리 옵션을 정합니다.',en:'Set where the voucher page sits and the split options.'},
+      {img:'sd_process',ko:'OCR로 업체명을 읽어 거래처별로 나눕니다. 애매한 건은 검토필요로 따로 표시됩니다.',en:'OCR reads the customer names and splits by customer. Unclear pages are flagged for review.'}]},
+    {id:'pi',icon:'ic_picipl',title:'PI / CI / PL Format',dark:false,ratio:'1160/1065',steps:[
+      {img:'pi_page',ko:'대리점을 고르면 환종, 항구, 거래조건이 자동으로 채워집니다.',en:'Pick the dealer and currency, ports and terms fill in automatically.'},
+      {img:'ci_page',ko:'PI를 저장하면 PI 번호가 CI로 이어집니다.',en:'Saving the PI carries its number into the CI.'},
+      {img:'pl_page',ko:'같은 정보로 패킹리스트까지 이어서 작성합니다.',en:'The packing list continues from the same data.'}]},
+    {id:'set',icon:'ic_settings',title:'Settings',dark:true,ratio:'2080/1520',steps:[
+      {img:'set_general',ko:'화면 모드(라이트/다크), 시작 방식, 최소화 위젯, 환율 띠를 토글로 설정합니다.',en:'Screen mode (light/dark), startup, the minimized widget and the rate strip, all as simple switches.'},
+      {img:'set_fav',ko:'즐겨찾기 사이트와 폴더를 등록하고, 위젯 모서리 칸에 연결합니다.',en:'Register favorite sites and folders and attach them to the widget corners.'},
+      {img:'set_more',ko:'설정 백업과 복원, 설치된 앱 상태, 서식 교체까지 한곳에서 확인합니다.',en:'Settings backup and restore, each app\'s install status and template replacement in one place.'}]},
+    {id:'rate',icon:'ic_settings',title:'Exchange rates',dark:false,ratio:'1400/1342',steps:[
+      {img:'rate',ko:'USD, EUR 등 환율 추이를 기간별로 보고, 아래 계산기로 바로 환산합니다.',en:'See USD, EUR and other rate trends by period, and convert right below in the calculator.'}]}
+  ];
+  var dIdx=-1,dStep=0;
+  var GR=[['INSIGHTS',['dash']],['SERVICE',['cert']],['OPERATIONS',['ds','sd','pi']]];
+  var SUB={dash:['Domestic & Overseas Sales Overview','ERP에서 영업매출 데이터를 받아 국내·해외 매출 현황을 보여줍니다.','Reads sales data from the ERP and shows domestic and overseas results.'],
+    cert:['Training Certificate Generation','Excel 데이터로 해외대리점 서비스 교육 수료증(PPT/PDF)을 자동 생성합니다.','Builds service-training certificates (PPT/PDF) from Excel data.'],
+    ds:['Customs Document Generation','세관 제출용 사유서(무상/반입/재수출/정정)를 자동 생성합니다.','Generates customs letters (free of charge, import, re-export, correction).'],
+    sd:['Shipping Document Automation','결의전표 기준으로 선적서류 스캔 PDF를 업체별로 자동 분리합니다.','Splits scanned shipping-document PDFs by customer, using the voucher as the key.'],
+    pi:['Invoice & Packing List Workbook','PI·CI·PL·견적 서식을 작성하는 Excel 매크로 통합문서입니다.','An Excel macro workbook that writes PI, CI, PL and quotation formats.']};
+  var dBody=document.getElementById('dbody'),dCap=document.getElementById('dcap'),dDots=document.getElementById('ddots'),dCtl=document.getElementById('dctl'),dPrev=document.getElementById('dprev'),dNext=document.getElementById('dnext'),dBack=document.getElementById('dback'),winBar=document.querySelector('.win-bar');
+  function isDark(){return root.getAttribute('data-app')==='dark'}
+  function byId(id){for(var i=0;i<DEMO.length;i++)if(DEMO[i].id===id)return i}
+  function drawHub(L){
+    winBar.style.display='none';
+    var W=2000,H=1462;
+    function box(x1,y1,x2,y2){return 'left:'+(x1/W*100)+'%;top:'+(y1/H*100)+'%;width:'+((x2-x1)/W*100)+'%;height:'+((y2-y1)/H*100)+'%'}
+    var rows={dash:[340,478],cert:[570,708],ds:[800,932],sd:[950,1078],pi:[1096,1228]};
+    var h='<div class="hubimg"><img src="demo/phy_hub'+(isDark()?'_dk':'')+'.webp" alt="Professional Hub for You" draggable="false">';
+    Object.keys(rows).forEach(function(id){var r=rows[id],i=byId(id);
+      h+='<button type="button" class="hs" data-i="'+i+'" style="'+box(497,r[0],1935,r[1])+'" aria-label="'+DEMO[i].title+'"><span class="ring"></span></button>';
+    });
+    h+='<button type="button" class="hs" data-i="'+byId('set')+'" style="'+box(18,398,417,464)+'" aria-label="Settings"></button>';
+    h+='<button type="button" class="hs" data-i="'+byId('rate')+'" style="'+box(30,1276,412,1392)+'" aria-label="Exchange rates"></button>';
+    h+='<button type="button" class="hs hs-min" style="'+box(60,12,114,66)+'" aria-label="Minimize"></button>';
+    var tip=function(x,y,t){return '<span class="tip2" style="left:'+(x/W*100)+'%;top:'+(y/H*100)+'%">'+t+'</span>'};
+    h+=tip(1480,300,L==='en'?'Click an app!':'앱을 눌러보세요!')+tip(250,418,L==='en'?'← Settings':'← 설정')+tip(300,1296,L==='en'?'← Exchange rates':'← 환율')+tip(540,24,L==='en'?'← Yellow button: minimize':'← 노란 버튼: 최소화');
+    h+='<span class="hand2" style="left:'+(1450/W*100)+'%;top:'+(380/H*100)+'%">👆</span></div>';
+    dBody.innerHTML=h;
+    Array.prototype.forEach.call(dBody.querySelectorAll('.hs[data-i]'),function(b){b.onclick=function(){dIdx=+b.getAttribute('data-i');dStep=0;dBody.innerHTML='';drawDemo()}});
+    dBody.querySelector('.hs-min').onclick=function(){dIdx=-2;dStep=0;dBody.innerHTML='';drawDemo()};
+    dBack.hidden=true;dCtl.style.display='none';
+    dCap.textContent=L==='en'?'This is the real PHY main screen. Click an app, Settings or the exchange rates, or the yellow button to minimize into a widget.':'실제 PHY 메인 화면입니다. 앱, Settings, 환율을 눌러 보세요. 노란 버튼을 누르면 최소화 위젯이 됩니다.';
+  }
+  function setMin(){}
+  function drawDesk(L){
+    setMin(false,L);dBack.hidden=false;winBar.style.display='none';dCtl.style.display='none';
+    var rows=[0,1,2,3,4].map(function(k){var top=(36+68*k)/480*100,h=68/480*100,go=k===0?'sd':k===1?'cert':'';
+      return '<button type="button" '+(go?'data-go="'+go+'"':'disabled')+(k===0?' class="hot"':'')+' style="top:'+top+'%;height:'+h+'%" aria-label="row '+(k+1)+'"></button>'}).join('');
+    rows+='<button type="button" data-go="hub" style="top:'+(380/480*100)+'%;height:'+(60/480*100)+'%" aria-label="PHY"></button>';
+    dBody.innerHTML='<div class="desk"><div class="desk-note">'+(L==='en'?'PHY is minimized. A small widget stays at the bottom right with the exchange rates.':'PHY를 최소화한 상태입니다. 화면 오른쪽 아래에 환율이 보이는 작은 위젯이 남습니다.')+'</div><div class="desk-bar"></div><button class="desk-orb" type="button" aria-label="PHY widget"><img src="m/wg_orb.webp" alt=""></button><span class="desk-tip">'+(L==='en'?'Click the widget!':'위젯을 눌러보세요!')+'</span></div>';
+    var desk=dBody.querySelector('.desk');
+    function openQ(){
+      desk.querySelector('.desk-tip').remove();
+      var q=document.createElement('div');q.className='desk-q';q.innerHTML='<img src="m/wg_quick.webp" alt="">'+rows;desk.appendChild(q);
+      dCap.textContent=L==='en'?'The widget opens a quick list. Pick a program, or open PHY again.':'위젯을 누르면 프로그램 목록이 열립니다. 바로 실행하거나 PHY를 다시 엽니다. (SplitDocs를 눌러보세요)';
+      Array.prototype.forEach.call(q.querySelectorAll('[data-go]'),function(b){b.onclick=function(){var g=b.getAttribute('data-go');dIdx=g==='hub'?-1:byId(g);dStep=0;dBody.innerHTML='';drawDemo()}});
+    }
+    desk.querySelector('.desk-orb').onclick=function(){if(!desk.querySelector('.desk-q'))openQ()};
+    dCap.textContent=L==='en'?'After minimizing, only a small widget is left. Click it.':'최소화하면 작은 위젯만 남습니다. 위젯을 눌러보세요.';
+  }
+  function drawDemo(){
+    var L=root.lang==='en'?'en':'ko';
+    if(dIdx===-2){drawDesk(L);return}
+    if(dIdx<0){drawHub(L);return}
+    setMin(false,L);
+    var a=DEMO[dIdx];
+    dBack.hidden=false;
+    winBar.style.display=(a.live||a.id==='pi')?'':'none';
+    document.getElementById('dtitle').textContent=a.title;
+    if(a.live){
+      if(!dBody.querySelector('iframe')){dBody.innerHTML='<iframe title="Sales Dashboard demo" src="'+a.live+'" loading="lazy"></iframe>'}
+      dCap.textContent=a.cap[L];dCtl.style.display='none';return;
+    }
+    dCtl.style.display='';
+    var st=a.steps[dStep],img=dBody.querySelector('img.shot-img');
+    if(!img){dBody.innerHTML='<img class="shot-img" alt=""><span class="clk"></span>';img=dBody.querySelector('img');img.onclick=function(){nextDemo()}}
+    dBody.querySelector('.clk').style.display=a.steps.length>1?'':'none';dNext.style.display=dPrev.style.display=a.steps.length>1?'':'none';dNext.classList.toggle('hint',a.steps.length>1);dBody.querySelector('.clk').textContent=dStep<a.steps.length-1?(L==='en'?'Click to continue ▶':'눌러서 다음 단계 ▶'):(L==='en'?'Click to replay ↺':'눌러서 처음부터 ↺');
+    img.style.aspectRatio=a.ratio||'1800/1440';
+    img.alt=a.title+' '+(dStep+1);
+    img.src='demo/'+st.img+((a.dark&&isDark())?'_dk':'')+'.webp';
+    Array.prototype.forEach.call(dBody.querySelectorAll('.hs,.tip2'),function(n){n.remove()});
+    if(a.id==='set'){
+      var W=2000,H=1462,bx=function(x1,y1,x2,y2){return 'left:'+(x1/W*100)+'%;top:'+(y1/H*100)+'%;width:'+((x2-x1)/W*100)+'%;height:'+((y2-y1)/H*100)+'%'};
+      var add=function(html){dBody.insertAdjacentHTML('beforeend',html)};
+      add('<button type="button" class="hs" data-nav="hub" style="'+bx(18,334,417,398)+'" aria-label="Applications"></button><span class="tip2" style="left:'+(250/W*100)+'%;top:'+(288/H*100)+'%">'+(L==='en'?'← Back to Applications':'← Applications로 돌아가기')+'</span>');
+      if(dStep===0){
+        add('<button type="button" class="hs hs-mode" data-mode="light" style="'+bx(1522,376,1698,436)+'" aria-label="Light"></button><button type="button" class="hs hs-mode" data-mode="dark" style="'+bx(1702,376,1878,436)+'" aria-label="Dark"></button><span class="tip2" style="left:'+(1300/W*100)+'%;top:'+(320/H*100)+'%">'+(L==='en'?'Switch light / dark here':'라이트 / 다크를 눌러 바꿔보세요')+'</span>');
+      }
+      Array.prototype.forEach.call(dBody.querySelectorAll('[data-mode]'),function(b){b.onclick=function(e){e.stopPropagation();setApp(b.getAttribute('data-mode'),true)}});
+      var nv=dBody.querySelector('[data-nav]');nv.onclick=function(e){e.stopPropagation();dIdx=-1;dStep=0;dBody.innerHTML='';drawDemo()};
+    }
+    dCap.textContent=st[L];
+    dDots.innerHTML=a.steps.map(function(_,i){return '<i class="'+(i===dStep?'on':'')+'"></i>'}).join('');
+    dPrev.disabled=dStep===0;
+    dNext.disabled=false;dNext.classList.add('hint');
+  }
+  function nextDemo(){var a=DEMO[dIdx];if(!a||!a.steps)return;dStep=(dStep+1)%a.steps.length;drawDemo()}
+  dBack.onclick=function(){dIdx=-1;dStep=0;dBody.innerHTML='';drawDemo()};
+  dPrev.onclick=function(){if(dStep>0){dStep--;drawDemo()}};
+  dNext.onclick=nextDemo;
+  window.__drawDemo=drawDemo;
+  drawDemo();
+})();
+</script>

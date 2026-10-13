@@ -1,0 +1,2547 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head><script>(function(){try{localStorage.getItem('x')}catch(e){var m={};Object.defineProperty(window,'localStorage',{value:{getItem:function(k){return k in m?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]}}})}})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sales Dashboard</title>
+<style>
+:root{--bg:#f5f5f7;--panel:#ffffff;--panel2:#fbfbfd;--text:#111318;--muted:#6e6e73;--line:#d9d9de;--blue:#0071e3;--blue2:#5ac8fa;--green:#34c759;--orange:#ff9f0a;--purple:#af52de;--red:#ff3b30;--shadow:0 10px 28px rgba(0,0,0,.06);--radius:22px}
+:root[data-theme="dark"]{--bg:#0a1220;--panel:#111c2e;--panel2:#0d1728;--text:#eef4ff;--muted:#91a1b8;--line:#26364d;--blue:#5b9cff;--blue2:#67d4ff;--green:#4fd889;--orange:#ffb454;--purple:#b88cff;--red:#ff6b6b;--shadow:0 12px 32px rgba(0,0,0,.22)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif;letter-spacing:-.015em}
+button,input,select{font:inherit}
+button{cursor:pointer}
+
+:root[data-theme="dark"] body{background:
+ radial-gradient(900px 420px at 8% -8%,rgba(59,156,255,.12),transparent 60%),
+ radial-gradient(800px 420px at 92% 0%,rgba(167,121,255,.10),transparent 58%),
+ var(--bg)}
+:root[data-theme="dark"] .topbar{background:rgba(8,20,34,.82);box-shadow:0 8px 30px rgba(0,0,0,.22)}
+:root[data-theme="dark"] .panel,
+:root[data-theme="dark"] .kpi,
+:root[data-theme="dark"] .score-panel,
+:root[data-theme="dark"] .target{background:linear-gradient(145deg,rgba(16,35,55,.96),rgba(9,23,38,.96))}
+:root[data-theme="dark"] .panel:hover,
+:root[data-theme="dark"] .kpi:hover,
+:root[data-theme="dark"] .target:hover{transform:translateY(-2px);border-color:#2c5578;box-shadow:0 18px 42px rgba(0,0,0,.34)}
+.panel,.kpi,.score-panel,.target{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.kpi .num,.score-value,.score-pct{font-variant-numeric:tabular-nums}
+.rank-row{padding:7px 5px;border-radius:12px;transition:.18s ease}
+.rank-row:hover{background:color-mix(in srgb,var(--blue) 8%,transparent);transform:translateX(3px)}
+.rank-line{background:color-mix(in srgb,var(--line) 72%,transparent)}
+.rank-line i{background:linear-gradient(90deg,var(--blue),var(--blue2));box-shadow:0 0 12px color-mix(in srgb,var(--blue) 35%,transparent)}
+.kpi-grid{gap:14px}
+
+/* ULTRA PREMIUM VISUAL LAYER */
+.section{animation:sectionIn .65s cubic-bezier(.2,.8,.2,1) both}
+.section:nth-of-type(2){animation-delay:.04s}.section:nth-of-type(3){animation-delay:.08s}
+.section:nth-of-type(4){animation-delay:.12s}.section:nth-of-type(5){animation-delay:.16s}
+.kpi,.target,.panel,.hero-score,.score-panel{position:relative;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
+.kpi:hover,.target:hover,.panel:hover{transform:translateY(-3px);box-shadow:0 18px 55px rgba(0,0,0,.24);border-color:rgba(110,216,255,.28)}
+.kpi::after,.panel::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(120deg,rgba(110,216,255,.08),transparent 35%,rgba(167,121,255,.06));opacity:.7}
+.hero-score{overflow:hidden}
+.hero-score::before{content:"";position:absolute;width:360px;height:360px;right:-140px;top:-180px;border-radius:50%;background:radial-gradient(circle,rgba(59,156,255,.25),transparent 68%);animation:orb 7s ease-in-out infinite}
+.hero-score::after{content:"";position:absolute;width:240px;height:240px;left:-150px;bottom:-170px;border-radius:50%;background:radial-gradient(circle,rgba(167,121,255,.18),transparent 70%);animation:orb 9s ease-in-out infinite reverse}
+.score-value,.score-pct{animation:valueIn .8s cubic-bezier(.16,1,.3,1) both}
+.big-progress i,.month-bar i,.rank-line i{transform-origin:left center;animation:barIn 1s cubic-bezier(.16,1,.3,1) both}
+.rank-row{padding:5px 4px;border-radius:10px;transition:background .2s ease,transform .2s ease}
+.rank-row:hover{background:rgba(110,216,255,.07);transform:translateX(3px)}
+.rank-row:nth-child(1) .idx{color:#ffd86b;font-weight:800}
+.rank-row:nth-child(2) .idx{color:#c7d3df;font-weight:800}
+.rank-row:nth-child(3) .idx{color:#d89a68;font-weight:800}
+.rank-row:nth-child(1) .rank-line i{background:linear-gradient(90deg,#ffd86b,#ff9f43)}
+.rank-row:nth-child(2) .rank-line i{background:linear-gradient(90deg,#c7d3df,#7fa2c2)}
+.rank-row:nth-child(3) .rank-line i{background:linear-gradient(90deg,#d89a68,#a96f45)}
+.visual-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:12px}
+.visual-card{min-height:300px}
+.donut-wrap{display:grid;grid-template-columns:190px 1fr;gap:24px;align-items:center;padding:22px}
+.donut{width:185px;height:185px;border-radius:50%;position:relative;display:grid;place-items:center;filter:drop-shadow(0 10px 24px rgba(0,0,0,.2));transform:scale(.82);animation:donutIn 1s cubic-bezier(.16,1,.3,1) forwards}
+.donut::after{content:"";width:112px;height:112px;border-radius:50%;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+.donut-center{position:absolute;z-index:2;text-align:center;line-height:1.1}
+.donut-center b{display:block;font-size:22px;letter-spacing:-.5px}
+.donut-center span{display:block;margin-top:6px;font-size:10px;color:var(--muted)}
+.legend{display:flex;flex-direction:column;gap:12px}
+.legend-item{display:grid;grid-template-columns:12px 1fr auto;gap:9px;align-items:center;font-size:11px}
+.legend-dot{width:10px;height:10px;border-radius:50%;box-shadow:0 0 12px currentColor}
+.legend-item b{font-size:12px}
+.mini-stat{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.mini-stat:last-child{border-bottom:0}
+.mini-stat span{color:var(--muted);font-size:10px}
+.mini-stat b{font-size:13px}
+.pulse{animation:pulseGlow 2.8s ease-in-out infinite}
+@keyframes sectionIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes valueIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes barIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes donutIn{from{transform:scale(.72) rotate(-18deg);opacity:.2}to{transform:scale(1) rotate(0);opacity:1}}
+@keyframes orb{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(-18px,12px,0)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 rgba(59,156,255,0)}50%{box-shadow:0 0 28px rgba(59,156,255,.12)}}
+@media(max-width:760px){.visual-grid{grid-template-columns:1fr}.donut-wrap{grid-template-columns:165px 1fr;gap:16px;padding:17px}.donut{width:155px;height:155px}.donut::after{width:94px;height:94px}.donut-center b{font-size:18px}}
+@media(max-width:430px){.donut-wrap{grid-template-columns:1fr;justify-items:center}.legend{width:100%}.donut{margin:auto}}
+
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.grid3{grid-template-columns:1fr 1fr}.hero-score{grid-template-columns:1fr}}
+@media(max-width:760px){
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:9px}
+  .kpi{padding:14px;border-radius:17px}
+  .kpi .num{font-size:23px}
+  .head h2{font-size:28px}
+  .mode button{flex:1;min-width:120px}
+  .subnav{overflow-x:auto;flex-wrap:nowrap;padding-bottom:3px}
+  .subnav button{white-space:nowrap}
+  .grid3,.grid2,.target-grid{grid-template-columns:1fr}
+  .panel,.score-panel,.target{border-radius:18px}
+}
+@media(max-width:430px){
+  .kpi-grid{grid-template-columns:1fr}
+  .head h2{font-size:25px}
+  .main{padding-left:11px;padding-right:11px}
+}
+
+.app{min-height:100vh}
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;height:72px;padding:0 28px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--panel) 88%, transparent);backdrop-filter:saturate(180%) blur(18px)}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:88px;height:32px;display:flex;align-items:center;justify-content:flex-start;flex:none}.logo img{display:block;width:88px;height:auto;max-height:32px;object-fit:contain;object-position:left center}
+.brand h1{font-size:16px;margin:0;font-weight:700}
+.brand p{font-size:11px;color:var(--muted);margin:3px 0 0}
+.actions{display:flex;align-items:center;gap:8px}
+.select,.theme button,.export{height:38px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);padding:0 12px}
+.theme{display:flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+.theme button{height:32px;border:0;background:transparent;padding:0 10px;color:var(--muted)}
+.theme button.active{background:var(--text);color:var(--bg);border-radius:9px}
+.export{position:fixed;right:18px;bottom:18px;z-index:30;background:var(--text);color:var(--bg);border:0;box-shadow:0 12px 28px rgba(0,0,0,.18);font-size:11px}
+.main{max-width:1500px;margin:0 auto;padding:24px 28px 70px}
+.head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:12px 0 18px}
+.head h2{font-size:34px;line-height:1.05;margin:0;font-weight:700;letter-spacing:-.04em}
+.head p{margin:8px 0 0;color:var(--muted);font-size:13px}
+.mode{display:flex;gap:8px;flex-wrap:wrap}
+.mode button{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:15px;padding:12px 18px;font-size:13px;font-weight:600;transition:.18s}
+.mode button.active{color:#fff;border-color:transparent;transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.12)}
+.mode button[data-mode="overseas"].active{background:linear-gradient(135deg,#0071e3,#5e5ce6)}
+.mode button[data-mode="domestic"].active{background:linear-gradient(135deg,#34c759,#30d158)}
+.subnav{display:flex;gap:7px;margin:0 0 20px;flex-wrap:wrap}
+.subnav button{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:12px;padding:10px 13px;font-size:12px}
+.subnav button.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+.kpi-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow)}
+.kpi .label{font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.kpi .num{font-size:29px;font-weight:750;letter-spacing:-.04em;margin-top:10px;font-variant-numeric:tabular-nums}
+.kpi .sub{font-size:11px;color:var(--muted);margin-top:6px}
+.kpi.accent .num{color:var(--blue)}
+.kpi.success .num{color:var(--green)}
+.kpi.warning .num{color:var(--orange)}
+.kpi.purple .num{color:var(--purple)}
+.hero-score{display:grid;grid-template-columns:1.35fr .65fr;gap:16px;margin-bottom:18px}
+.score-panel{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:var(--shadow)}
+.score-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.score-title{font-size:12px;color:var(--muted)}
+.score-value{font-size:48px;font-weight:780;letter-spacing:-.055em;margin-top:8px}
+.score-pct{font-size:46px;font-weight:800;letter-spacing:-.05em;color:var(--blue)}
+.progress{height:12px;background:var(--line);border-radius:99px;overflow:hidden;margin:16px 0 0}
+.progress i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--blue2))}
+.score-foot{display:flex;justify-content:space-between;gap:15px;margin-top:10px;font-size:11px;color:var(--muted)}
+.section{margin-top:28px}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:10px}
+.section-head h3{font-size:19px;margin:0;letter-spacing:-.03em}
+.section-head p{margin:4px 0 0;color:var(--muted);font-size:11px}
+.target-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.target-grid.domestic{grid-template-columns:minmax(0,1fr)}
+.target{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:19px;box-shadow:var(--shadow);overflow:hidden}
+.target::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--blue)}
+.target[data-key="dealer"]::before{background:var(--blue)}
+.target[data-key="skd"]::before{background:var(--orange)}
+.target[data-key="corp"]::before{background:var(--purple)}
+.target[data-key="domestic"]::before{background:var(--green)}
+.target-head{display:flex;justify-content:space-between;gap:10px;align-items:start}
+.target h4{margin:0;font-size:16px}
+.target .t-pct{font-size:28px;font-weight:800;letter-spacing:-.05em}
+.target .target-meta{color:var(--muted);font-size:11px;margin-top:3px}
+.target-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}
+.target-stat{padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}
+.target-stat span{display:block;color:var(--muted);font-size:10px}
+.target-stat b{display:block;font-size:15px;margin-top:4px;font-variant-numeric:tabular-nums}
+.target .big-progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:14px}
+.target .big-progress i{display:block;height:100%;border-radius:99px}
+.target-input{margin-top:14px;display:flex;gap:7px;align-items:center}
+.target-input input{width:100%;min-width:0;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;padding:8px 9px;font-size:11px}
+.target-input button{border:0;background:var(--text);color:var(--bg);border-radius:10px;padding:8px 10px;font-size:11px}
+.grid2{display:grid;grid-template-columns:1.25fr .95fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+.panel-head{display:flex;justify-content:space-between;align-items:center;padding:15px 17px 6px}
+.panel-head h4{margin:0;font-size:13px}
+.panel-head span{color:var(--muted);font-size:10px}
+.panel-body{padding:12px 17px 18px}
+.months{display:flex;flex-direction:column;gap:9px}
+.month-row{display:grid;grid-template-columns:30px 1fr 76px;gap:8px;align-items:center;font-size:11px}
+.month-row .m{color:var(--muted)}
+.month-bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+.month-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--blue2))}
+.amt{text-align:right;font-variant-numeric:tabular-nums}
+.table{width:100%;border-collapse:collapse;font-size:11px}
+.table th,.table td{padding:9px 7px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+.table th:first-child,.table td:first-child{text-align:left;color:var(--muted)}
+.table tr:last-child td{border-bottom:0;font-weight:700}
+.rank{display:flex;flex-direction:column;gap:7px}
+.rank-row{display:grid;grid-template-columns:22px 1fr 76px;gap:8px;align-items:center;font-size:11px}
+.rank-row .idx{color:var(--muted)}
+.rank-row .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-line{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:5px}
+.rank-line i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--blue2))}
+.rank-val{text-align:right;font-variant-numeric:tabular-nums}
+.seg-mini{display:flex;gap:6px;margin:0 0 10px}
+.seg-mini button{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;transition:.18s}
+.seg-mini button:hover{color:var(--text,#fff)}
+.seg-mini button.active{color:#fff;background:var(--blue);border-color:transparent}
+.seg-mini.off{opacity:.38;pointer-events:none}
+.rank-sep{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;padding-top:9px;border-top:1px dashed var(--line);font-size:11px;color:var(--muted)}
+.rank-sep b{font-weight:600;font-variant-numeric:tabular-nums}
+.footer{margin-top:28px;color:var(--muted);font-size:10px;line-height:1.6;padding-bottom:20px}
+.empty{padding:28px;text-align:center;color:var(--muted);font-size:12px}
+.recent-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.recent-table th:nth-child(1){width:34px}.recent-table th:nth-child(2){width:104px}.recent-table th:nth-child(5){width:150px}.recent-table th:nth-child(6){width:150px}
+.recent-table th{font-size:10px;color:var(--muted);font-weight:600;text-align:left;padding:10px 12px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.recent-table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.recent-table tr:last-child td{border-bottom:0}
+.recent-table tbody tr{transition:background .18s ease}
+.recent-table tbody tr:hover{background:color-mix(in srgb,var(--blue) 7%,transparent)}
+.recent-table .rc-idx{color:var(--muted);font-variant-numeric:tabular-nums}
+.recent-table .rc-date{white-space:nowrap;color:var(--muted);font-variant-numeric:tabular-nums}
+.recent-table .rc-cust{font-weight:650;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent-table .rc-item{max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.recent-table .rc-amt{text-align:right;font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap}
+.recent-table th.rc-amt{text-align:right}
+.recent-table .rc-amt.neg{color:var(--red)}
+.recent-table .rc-tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:650;background:color-mix(in srgb,var(--blue) 12%,transparent);color:var(--blue);margin-right:4px;white-space:nowrap}
+.recent-table .rc-tag.svc{background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--green)}
+.recent-wrap{overflow-x:auto}
+.recent-table tbody tr.rc-row{cursor:pointer}
+.recent-table .rc-caret{display:inline-block;width:14px;color:var(--muted);transition:transform .18s ease}
+.recent-table tr.open .rc-caret{transform:rotate(90deg)}
+.recent-table tr.rc-detail>td{padding:0 12px 12px 52px;background:color-mix(in srgb,var(--blue) 4%,transparent)}
+.rc-sub{width:100%;border-collapse:collapse;font-size:11px}
+.rc-sub th{font-size:10px;color:var(--muted);font-weight:600;text-align:left;padding:8px 8px 6px;border-bottom:1px solid var(--line)}
+.rc-sub td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}
+.rc-sub tr:last-child td{border-bottom:0}
+.rc-sub .r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rc-sub .neg{color:var(--red)}
+.cust-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cc-sum{font-size:11px;color:var(--muted);padding:2px 17px 8px}
+.cc-sum b{color:var(--text);font-weight:750}
+.cc-row{display:grid;grid-template-columns:22px minmax(0,1fr) 86px 96px;gap:8px;align-items:center;padding:8px 17px;border-top:1px solid var(--line);font-size:12px}
+.cc-row .i{color:var(--muted);font-variant-numeric:tabular-nums}
+.cc-row .nm{font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cc-row .dt{color:var(--muted);font-variant-numeric:tabular-nums;font-size:11px;white-space:nowrap}
+.cc-row .am{text-align:right;font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media(max-width:900px){.cust-grid{grid-template-columns:1fr}}
+.cc-row .am.neg{color:var(--red)}
+.cc-row .dt.neg{color:var(--red)}
+.kpi-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.conc-big{display:flex;align-items:baseline;gap:10px;padding:2px 17px 4px}
+.conc-big b{font-size:34px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.conc-big span{font-size:11px;color:var(--muted)}
+.conc-delta.up{color:var(--orange)}.conc-delta.down{color:var(--green)}
+
+@media(max-width:760px){.recent-table .rc-item{display:none}}
+
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.grid3{grid-template-columns:1fr 1fr}.hero-score{grid-template-columns:1fr}}
+@media(max-width:760px){.topbar{padding:0 14px;height:64px}.main{padding:17px 14px 60px}.head{align-items:flex-start;flex-direction:column}.kpi-grid{grid-template-columns:1fr 1fr}.target-grid,.grid2,.grid3{grid-template-columns:1fr}.score-value{font-size:36px}.score-pct{font-size:34px}.actions .theme{display:none}.logo{width:78px;height:28px}.logo img{width:78px;max-height:28px}.brand h1{font-size:14px}}
+<style>#csvStatus.error{color:#c62828}
+/* ===== ULTIMATE EXECUTIVE BI LAYER ===== */
+:root[data-theme="dark"]{
+  --bg:#050b16;--panel:#0b1524;--panel2:#09111e;--text:#f5f8ff;--muted:#8195ad;
+  --line:#1b3048;--blue:#4aa3ff;--blue2:#70e0ff;--green:#46e59a;--orange:#ffb84d;
+  --purple:#ae83ff;--red:#ff6f83;--cyan:#5ce1e6;
+  --shadow:0 20px 70px rgba(0,0,0,.34)
+}
+body{overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-3;pointer-events:none;background:
+ radial-gradient(900px 500px at 5% 0%,rgba(43,126,255,.13),transparent 62%),
+ radial-gradient(900px 500px at 100% 5%,rgba(143,82,255,.11),transparent 62%),
+ radial-gradient(700px 500px at 50% 100%,rgba(0,212,255,.055),transparent 65%)}
+body::after{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:.045;
+ background-image:radial-gradient(rgba(255,255,255,.8) .6px,transparent .6px);background-size:5px 5px}
+.topbar{height:76px!important;border-bottom:1px solid rgba(112,224,255,.10)!important}
+:root[data-theme="dark"] .topbar{background:rgba(5,13,25,.72)!important;backdrop-filter:blur(24px) saturate(170%)}
+.brand h1{letter-spacing:-.035em}
+.brand p{letter-spacing:.04em;text-transform:uppercase}
+.main{max-width:1580px!important}
+.head{margin-top:22px!important}
+.head h2{font-size:40px!important;background:linear-gradient(110deg,#fff 15%,#a9d9ff 48%,#8f9cff 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.head p{font-size:12px!important}
+.mode button{background:rgba(12,26,43,.74)!important;backdrop-filter:blur(12px)}
+.mode button.active{box-shadow:0 0 30px rgba(74,163,255,.18),0 12px 28px rgba(0,0,0,.28)!important}
+.kpi,.score-panel,.target,.panel{background:linear-gradient(145deg,rgba(14,29,48,.93),rgba(7,17,29,.94))!important;border-color:rgba(103,160,204,.16)!important;box-shadow:0 12px 45px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.025)!important}
+.kpi{overflow:hidden}
+.kpi::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue2),transparent);opacity:.35}
+.kpi .num{font-size:31px!important}
+.executive-hero{position:relative;display:grid;grid-template-columns:1.5fr .5fr;gap:14px;margin:0 0 18px;min-height:330px}
+.exec-card{position:relative;overflow:hidden;border:1px solid rgba(105,178,232,.16);border-radius:28px;background:
+ linear-gradient(135deg,rgba(12,31,53,.96),rgba(5,15,28,.96));box-shadow:0 25px 80px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.035)}
+.exec-main{padding:28px;padding-bottom:155px;min-height:370px}
+.exec-eyebrow{display:flex;align-items:center;gap:9px;color:#91b6d9;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#46e59a;box-shadow:0 0 14px #46e59a;animation:livePulse 1.8s infinite}
+.exec-title{font-size:31px;font-weight:760;letter-spacing:-.045em;margin:18px 0 8px}
+.exec-sub{font-size:12px;color:var(--muted);max-width:610px;line-height:1.65}
+.exec-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:23px}
+.exec-metric{padding:13px 14px;border:1px solid rgba(103,160,204,.13);border-radius:15px;background:rgba(255,255,255,.025)}
+.exec-metric span{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.exec-metric b{display:block;margin-top:6px;font-size:19px;letter-spacing:-.035em}
+.exec-chart{position:absolute;left:26px;right:26px;bottom:14px;height:112px;opacity:.98;border-top:1px solid rgba(112,224,255,.08);padding-top:8px}
+.exec-chart::before{content:"MONTHLY REVENUE";position:absolute;left:0;top:-16px;font-size:8px;letter-spacing:.10em;color:#7189a3}
+.exec-chart canvas{width:100%!important;height:100%!important}
+.exec-side{padding:22px;display:flex;flex-direction:column;justify-content:space-between}
+.gauge{width:176px;height:176px;margin:0 auto;border-radius:50%;display:grid;place-items:center;position:relative;background:conic-gradient(from -90deg,#4aa3ff 0deg,#70e0ff 0deg,rgba(255,255,255,.055) 0deg 360deg);box-shadow:0 0 55px rgba(74,163,255,.08)}
+.gauge::after{content:"";position:absolute;inset:13px;border-radius:50%;background:#091523;border:1px solid rgba(103,160,204,.14);box-shadow:inset 0 0 35px rgba(0,0,0,.3)}
+.gauge-center{position:relative;z-index:1;text-align:center}
+.gauge-center b{display:block;font-size:35px;letter-spacing:-.055em}
+.gauge-center span{display:block;color:var(--muted);font-size:9px;margin-top:5px;text-transform:uppercase;letter-spacing:.08em}
+.side-caption{text-align:center;color:var(--muted);font-size:10px;line-height:1.6}
+.side-caption strong{color:var(--text);font-size:12px}
+.analytics-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}
+.analytics-toolbar .tag{font-size:9px;color:#83b8e4;padding:6px 9px;border:1px solid rgba(83,170,235,.16);border-radius:99px;background:rgba(59,156,255,.05);letter-spacing:.06em}
+.chart-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:12px}
+.chart-panel{min-height:330px}
+.chart-wrap{padding:6px 14px 18px;height:270px;position:relative}
+.chart-wrap canvas{width:100%;height:100%;display:block}
+.chart-legend{display:flex;gap:15px;flex-wrap:wrap;padding:0 17px 13px;color:var(--muted);font-size:10px}
+.chart-legend span{display:inline-flex;align-items:center;gap:6px}
+.chart-legend i{width:7px;height:7px;border-radius:50%;display:inline-block;box-shadow:0 0 10px currentColor}
+.heatmap{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;padding:15px 17px 20px}
+.heat-cell{height:27px;border-radius:6px;border:1px solid rgba(255,255,255,.025);transition:transform .2s,filter .2s}
+.heat-cell:hover{transform:scale(1.08);filter:brightness(1.3)}
+.heat-labels{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;padding:0 17px;color:var(--muted);font-size:8px;text-align:center}
+.executive-badge{position:absolute;right:20px;top:18px;padding:7px 10px;border-radius:99px;font-size:9px;letter-spacing:.08em;color:#a7d8ff;background:rgba(74,163,255,.07);border:1px solid rgba(74,163,255,.15)}
+.spark{display:inline-block;width:70px;height:20px;vertical-align:middle;margin-left:6px}
+[data-animate]{opacity:0;transform:translateY(8px);animation:rise .7s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+@keyframes livePulse{0%,100%{opacity:.55;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+@keyframes sweep{from{stroke-dashoffset:900}to{stroke-dashoffset:0}}
+@media(max-width:1050px){.executive-hero{grid-template-columns:1fr}.exec-side{min-height:290px}.chart-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.head h2{font-size:30px!important}.exec-title{font-size:25px}.exec-metrics{grid-template-columns:1fr 1fr}.exec-metric:last-child{grid-column:1/-1}.chart-wrap{height:235px}.executive-hero{min-height:0}.exec-main{padding:22px}.exec-side{padding:18px}.gauge{width:155px;height:155px}}
+@media(max-width:430px){.exec-metrics{grid-template-columns:1fr}.exec-metric:last-child{grid-column:auto}.exec-title{font-size:22px}.gauge{width:145px;height:145px}.gauge-center b{font-size:29px}}
+
+
+/* ===== LIGHT MODE OVERRIDE =====
+   Premium styling remains, but the normal/light theme must stay genuinely light.
+*/
+
+
+/* Interactive donut chart */
+.donut{cursor:pointer;isolation:isolate}
+.donut svg{position:absolute;inset:0;width:100%;height:100%;z-index:1;overflow:visible}
+.donut::after{z-index:0}
+.donut-center{z-index:3;pointer-events:none}
+.donut-slice{transition:filter .22s ease,opacity .22s ease,transform .22s ease;transform-origin:50% 50%}
+.donut-slice:hover,.donut-slice.active{filter:brightness(1.18) drop-shadow(0 0 8px currentColor);opacity:1}
+.donut-slice.dimmed{opacity:.38}
+.donut-hint{position:absolute;left:50%;bottom:-19px;transform:translateX(-50%);font-size:8px;color:var(--muted);white-space:nowrap;z-index:4;pointer-events:none;opacity:.8}
+.legend-item.clickable{cursor:pointer}
+.legend-item.clickable:hover{background:rgba(110,216,255,.06)}
+
+
+/* Remove native keyboard-focus rectangle from interactive donut SVG */
+.donut svg,
+.donut svg:focus,
+.donut-slice,
+.donut-slice:focus,
+.donut-slice:focus-visible{
+  outline:none!important;
+}
+
+
+.exec-spark-labels{position:absolute;left:0;right:0;bottom:-2px;display:grid;grid-template-columns:repeat(12,1fr);font-size:8px;color:#6f849a;text-align:center}
+.exec-spark-labels span{opacity:.8}
+.donut-slice.selected{filter:brightness(1.16) drop-shadow(0 0 8px currentColor)}
+
+
+/* ===== FINAL UI / THEME & SELECTION FIX ===== */
+
+/* Main mode switch */
+.mode{display:flex;gap:8px;align-items:center}
+.mode button{
+  min-width:76px;height:40px!important;padding:0 16px!important;
+  border-radius:12px!important;
+  font-weight:700!important;
+  border:1px solid #d8dce3!important;
+  background:#fff!important;
+  color:#5f6672!important;
+  box-shadow:0 2px 8px rgba(0,0,0,.05)!important;
+  transition:all .22s ease!important;
+}
+.mode button:hover{transform:translateY(-1px)}
+.mode button.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#1976d2,#315efb)!important;
+  border-color:#1976d2!important;
+  box-shadow:0 7px 22px rgba(25,118,210,.28)!important;
+}
+:root[data-theme="dark"] .mode button{
+  background:rgba(12,26,43,.9)!important;
+  color:#91a5bb!important;
+  border-color:#24415d!important;
+  box-shadow:none!important;
+}
+:root[data-theme="dark"] .mode button.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#1677d8,#4d73ff)!important;
+  border-color:#4aa3ff!important;
+  box-shadow:0 0 24px rgba(74,163,255,.22)!important;
+}
+
+/* Overseas segment navigation: always make the active segment obvious */
+.subnav{display:flex;flex-wrap:wrap;gap:8px}
+.subnav button{
+  min-height:38px!important;
+  padding:8px 15px!important;
+  border-radius:11px!important;
+  border:1px solid #d8dce3!important;
+  background:#fff!important;
+  color:#5f6672!important;
+  font-weight:650!important;
+  transition:all .22s ease!important;
+}
+.subnav button:hover{
+  border-color:#8ebbe8!important;
+  color:#1769aa!important;
+  transform:translateY(-1px);
+}
+.subnav button.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#1976d2,#315efb)!important;
+  border-color:#1976d2!important;
+  box-shadow:0 7px 20px rgba(25,118,210,.24)!important;
+}
+:root[data-theme="dark"] .subnav button{
+  background:rgba(12,26,43,.88)!important;
+  color:#8fa4ba!important;
+  border-color:#23405a!important;
+}
+:root[data-theme="dark"] .subnav button:hover{
+  color:#bfe6ff!important;
+  border-color:#3974a8!important;
+}
+:root[data-theme="dark"] .subnav button.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#1576d5,#4b70f5)!important;
+  border-color:#4aa3ff!important;
+  box-shadow:0 0 25px rgba(74,163,255,.22)!important;
+}
+
+/* Fix light-mode premium surfaces: no dark cards bleeding through. */
+
+/* Prevent blank-looking headings/text in light mode. */
+
+/* Selected rank/legend items should be obvious in both themes. */
+.legend-item.clickable{
+  padding:7px 9px!important;
+  margin:-2px -9px!important;
+  border-radius:9px!important;
+  transition:all .2s ease!important;
+}
+.legend-item.clickable:hover{
+  background:rgba(25,118,210,.07)!important;
+}
+.legend-item.clickable.selected{
+  background:rgba(25,118,210,.12)!important;
+  box-shadow:inset 3px 0 0 #3b9cff!important;
+}
+
+/* Do not show a "blank white pill" in light mode when a selected state is active. */
+
+/* Mobile: preserve visible selected states */
+@media(max-width:700px){
+  .mode button{min-width:68px;padding:0 12px!important}
+  .subnav button{padding:7px 11px!important}
+}
+
+/* ===== FINAL OVERRIDE: LIGHT MODE ACTIVE BUTTONS =====
+   Higher specificity is intentional: older light-mode rules used !important
+   and otherwise overrode the active state, leaving white text on white.
+*/
+
+
+/* ===== LIGHT MODE KPI ACCENT COLORS ===== */
+
+
+
+.mode button[data-mode="all"].active{
+  background:linear-gradient(135deg,#7b61ff,#a979ff)!important;
+  color:#fff!important;border-color:#8c70ff!important;
+  box-shadow:0 8px 22px rgba(121,97,255,.25)!important;
+}
+
+
+.donut{position:relative;overflow:visible}
+.donut-svg{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:1!important;display:block!important;overflow:visible}
+.donut::after{z-index:0!important;pointer-events:none}
+.donut-center{z-index:3!important}
+.donut-hint{z-index:4!important}
+.donut-slice{opacity:1;cursor:pointer;transition:filter .2s ease,opacity .2s ease}
+.donut-slice:hover,.donut-slice.active,.donut-slice.selected{filter:brightness(1.16) drop-shadow(0 0 7px currentColor);opacity:1}
+.donut-slice.dimmed{opacity:.30}
+
+
+.visual-card{min-height:365px!important}
+.donut-wrap{display:grid!important;grid-template-columns:220px minmax(0,1fr)!important;gap:34px!important;align-items:center!important;min-height:300px!important;padding:26px 28px!important}
+.donut{width:210px!important;height:210px!important;min-width:210px!important;min-height:210px!important;border-radius:50%!important;position:relative!important;display:grid!important;place-items:center!important;transform:none!important;animation:donutIn .8s cubic-bezier(.16,1,.3,1) both!important;filter:drop-shadow(0 12px 28px rgba(0,0,0,.18))!important;cursor:pointer!important;isolation:isolate!important;overflow:visible!important}
+.donut::after{content:"";position:absolute!important;inset:34px!important;width:auto!important;height:auto!important;border-radius:50%!important;background:var(--panel)!important;box-shadow:inset 0 0 0 1px var(--line),0 0 0 1px rgba(255,255,255,.03)!important;z-index:1!important;pointer-events:none!important}
+.donut-center{position:absolute!important;inset:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;z-index:3!important;pointer-events:none!important;line-height:1.1!important}
+.donut-center b{display:block!important;font-size:28px!important;letter-spacing:-.8px!important}
+.donut-center span{display:block!important;margin-top:7px!important;font-size:11px!important;color:var(--muted)!important}
+.donut-hint{position:absolute!important;left:50%!important;bottom:-25px!important;transform:translateX(-50%)!important;font-size:9px!important;color:var(--muted)!important;white-space:nowrap!important;z-index:4!important;pointer-events:none!important;opacity:.8!important}
+.donut.selected{filter:drop-shadow(0 14px 34px rgba(59,156,255,.22))!important}
+@media(max-width:760px){.visual-card{min-height:350px!important}.donut-wrap{grid-template-columns:200px minmax(0,1fr)!important;gap:22px!important;padding:22px!important}.donut{width:190px!important;height:190px!important;min-width:190px!important;min-height:190px!important}.donut::after{inset:31px!important}.donut-center b{font-size:24px!important}}
+@media(max-width:520px){.donut-wrap{grid-template-columns:1fr!important;justify-items:center!important}.donut{margin:auto}.legend{width:100%!important}}
+
+
+.donut-hit-svg{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  z-index:5!important;
+  overflow:visible!important;
+  pointer-events:none!important;
+}
+.donut-hit{
+  fill:none!important;
+  stroke:transparent!important;
+  cursor:pointer!important;
+  pointer-events:stroke!important;
+  outline:none!important;
+}
+.donut-hit:hover,.donut-hit.active{
+  stroke:rgba(255,255,255,.001)!important;
+}
+.donut-center,.donut-hint{
+  pointer-events:none!important;
+}
+.legend-item.clickable.active,
+.legend-item.clickable.selected{
+  background:rgba(59,156,255,.12)!important;
+  border-radius:9px!important;
+  box-shadow:inset 3px 0 0 #3b9cff!important;
+}
+
+
+/* Final donut interaction: the donut itself receives the click and resolves
+   the selected segment from the actual pointer coordinates. */
+.donut-hit-svg{display:none!important}
+.donut-hit{display:none!important}
+.donut{cursor:pointer!important;touch-action:manipulation}
+.donut::after{pointer-events:none!important}
+.donut-hint{pointer-events:none!important}
+.donut-center{pointer-events:none!important;cursor:default!important}
+
+
+/* ===== HEADER-INTEGRATED NAVIGATION / DATA CONTROLS ===== */
+.header-actions{
+  display:flex;align-items:center;justify-content:flex-end;gap:8px;
+  flex-wrap:wrap;min-width:0;
+}
+.header-actions .mode{
+  display:flex;gap:6px;flex-wrap:nowrap;
+}
+.header-actions .mode button{
+  min-width:66px;height:38px;padding:0 14px;
+  border-radius:12px;font-size:12px;font-weight:700;
+  border:1px solid var(--line);background:var(--panel);color:var(--muted);
+}
+.header-actions .mode button.active{
+  color:#fff;border-color:transparent;transform:translateY(-1px);
+  box-shadow:0 8px 18px rgba(0,0,0,.12);
+}
+.header-actions .mode button[data-mode="overseas"].active{
+  background:linear-gradient(135deg,#0071e3,#5e5ce6);
+}
+.header-actions .mode button[data-mode="domestic"].active{
+  background:linear-gradient(135deg,#34c759,#30d158);
+}
+.header-actions .mode button[data-mode="all"].active{
+  background:linear-gradient(135deg,#7b61ff,#a979ff);
+}
+.csv-header{
+  height:38px;display:flex;align-items:center;gap:7px;
+  padding:0 6px 0 10px;border:1px solid var(--line);
+  border-radius:12px;background:var(--panel2);
+  min-width:0;max-width:265px;
+}
+.csv-header #csvStatus{
+  max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--muted);font-size:10px;
+}
+.csv-select-btn{
+  display:inline-flex;align-items:center;height:28px;padding:0 9px;
+  border:1px solid var(--line);border-radius:9px;background:var(--panel);
+  color:var(--text);font-size:10px;font-weight:650;cursor:pointer;
+}
+.csv-select-btn input{display:none}
+.header-export{
+  position:static!important;
+  height:38px!important;min-width:66px;
+  margin:0!important;border:1px solid var(--line)!important;
+  border-radius:12px!important;background:var(--text)!important;
+  color:var(--bg)!important;box-shadow:none!important;
+  font-size:10px!important;
+}
+:root[data-theme="dark"] .csv-header{
+  background:rgba(8,20,34,.74);
+}
+/* The title area now focuses on the current dashboard title only. */
+.head{align-items:flex-start!important}
+.head .mode{display:none}
+@media(max-width:1180px){
+  .header-actions{gap:6px}
+  .csv-header{max-width:215px}
+  .csv-header #csvStatus{max-width:105px}
+}
+@media(max-width:900px){
+  .header-actions{width:100%;justify-content:flex-end}
+  .topbar{height:auto;min-height:72px;padding-top:10px;padding-bottom:10px}
+}
+@media(max-width:700px){
+  .header-actions{justify-content:flex-start}
+  .header-actions .mode{order:0}
+  .header-actions .select{order:1}
+  .header-actions .theme{order:2}
+  .csv-header{order:3;flex:1;min-width:180px;max-width:none}
+  .header-export{order:4}
+  .header-actions .mode button{min-width:58px;padding:0 11px}
+  .csv-header #csvStatus{max-width:calc(100vw - 260px)}
+}
+@media(max-width:430px){
+  .header-actions .mode button{min-width:55px;padding:0 9px}
+  .header-actions .select{max-width:100px}
+  .csv-header{min-width:100%;order:3}
+  .header-export{flex:1}
+}
+
+
+/* ===== DONUT = DISPLAY ONLY / LEGEND = CONTROL ===== */
+.donut{cursor:default!important}
+.donut,
+.donut *{pointer-events:none!important}
+.donut-hit-svg,
+.donut-hit,
+.donut-hit path,
+.donut-hit circle{display:none!important;pointer-events:none!important}
+.legend-item.clickable{
+  cursor:pointer!important;
+  pointer-events:auto!important;
+  padding:8px 10px!important;
+  border-radius:10px!important;
+  transition:background .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+.legend-item.clickable:hover{
+  transform:translateX(2px);
+  background:rgba(59,156,255,.07)!important;
+}
+.legend-item.clickable.active,
+.legend-item.clickable.selected{
+  background:rgba(59,156,255,.13)!important;
+  box-shadow:inset 3px 0 0 #3b9cff!important;
+}
+
+
+/* ===== THEME SWITCH AT FAR RIGHT ===== */
+.header-actions{display:flex;align-items:center}
+.header-actions .theme{order:99;margin-left:auto}
+.header-actions .header-export{order:90}
+.header-actions .csv-header{order:80}
+.header-actions .select{order:40}
+.header-actions .mode{order:10}
+@media(max-width:900px){
+  .header-actions .theme{order:99;margin-left:auto}
+}
+@media(max-width:700px){
+  .header-actions .theme{order:5;margin-left:0}
+  .header-actions .mode{order:0}
+  .header-actions .select{order:1}
+  .header-actions .csv-header{order:3}
+  .header-actions .header-export{order:4}
+}
+
+
+/* ===== OVERSEAS SERVICE TARGET CARD ===== */
+.target-grid-overall,
+.target-grid{align-items:stretch}
+.service-target{
+  position:relative;
+  background:linear-gradient(145deg,rgba(22,31,53,.96),rgba(10,18,31,.97))!important;
+  border-color:rgba(167,121,255,.24)!important;
+  box-shadow:0 14px 42px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.03)!important;
+}
+.service-target::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:18px 0 0 18px;
+  background:linear-gradient(180deg,#a979ff,#6e7cff);
+}
+.service-accent{
+  color:#a979ff!important;
+  font-size:11px!important;
+  letter-spacing:.08em;
+}
+.service-progress{background:rgba(167,121,255,.14)!important}
+.service-progress i{
+  background:linear-gradient(90deg,#a979ff,#6e7cff)!important;
+}
+@media(max-width:1050px){
+  .target-grid-overall,.target-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  .target-grid-overall,.target-grid{grid-template-columns:1fr}
+}
+
+
+.domestic-service-target{
+  border-color:rgba(63,224,138,.24)!important;
+}
+.domestic-service-target::before{
+  background:linear-gradient(180deg,#3fe08a,#2bb673)!important;
+}
+.domestic-service-accent{
+  color:#3fe08a!important;
+  font-size:11px!important;
+  letter-spacing:.08em;
+}
+.domestic-service-progress{
+  background:rgba(63,224,138,.14)!important;
+}
+.domestic-service-progress i{
+  background:linear-gradient(90deg,#3fe08a,#2bb673)!important;
+}
+
+
+.service-target{
+  position:relative;
+}
+.service-target .target-input input{
+  width:100%;box-sizing:border-box;height:38px;padding:0 12px;border-radius:10px;
+  border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:12px;
+}
+.service-target .target-input button{
+  min-height:38px;border:1px solid var(--line);border-radius:10px;
+  background:var(--panel2);color:var(--text);font-size:11px;cursor:pointer;
+}
+.service-target .target-input button:hover{
+  border-color:#a979ff;
+}
+.service-goal-actions button{
+  flex:1!important;
+}
+.overseas-service-goal-card::before,.domestic-service-goal-card::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:18px 0 0 18px;
+}
+.overseas-service-goal-card::before{background:linear-gradient(180deg,#a979ff,#6e7cff)}
+.domestic-service-goal-card::before{background:linear-gradient(180deg,#ff6f83,#d64561)}
+.overseas-service-goal-card{border-color:rgba(167,121,255,.24)!important}
+.domestic-service-goal-card{border-color:rgba(255,111,131,.24)!important}
+
+
+/* ===== UNIFIED GOAL EDITING / CARD LAYOUT ===== */
+.target-grid-overseas{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.target-grid-domestic{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.target-grid-overall{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.goal-edit-input{
+  width:100%!important;box-sizing:border-box;height:38px;padding:0 12px;
+  border-radius:10px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--text);font-size:12px;
+}
+.goal-edit-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,156,255,.09)}
+.goal-edit-actions{
+  grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:18px;
+  margin-top:2px;padding:15px 18px;border:1px dashed var(--line);border-radius:16px;
+  background:color-mix(in srgb,var(--panel) 92%,transparent);
+}
+.goal-edit-actions>div:first-child{display:flex;flex-direction:column;gap:4px}
+.goal-edit-actions strong{font-size:12px}
+.goal-edit-actions span{font-size:10px;color:var(--muted)}
+.goal-edit-actions-right{display:flex!important;flex-direction:row!important;gap:8px!important}
+.goal-edit-actions button{
+  min-width:92px;height:36px;padding:0 14px;border-radius:10px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--text);cursor:pointer;
+}
+.goal-edit-actions #saveGoals{
+  border:0;background:var(--text);color:var(--bg);
+}
+.goal-global-editor{
+  grid-column:1/-1;padding:17px 18px;border:1px solid var(--line);border-radius:16px;
+  background:var(--panel2);
+}
+.goal-global-head{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.goal-global-head strong{font-size:13px}
+.goal-global-head span{font-size:10px;color:var(--muted)}
+.goal-global-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.goal-global-grid label{font-size:10px;color:var(--muted)}
+.goal-global-grid input{margin-top:6px}
+.derived-target{opacity:.98}
+.goal-derived-note{margin-top:10px;font-size:9px;color:var(--muted)}
+@media(max-width:1180px){
+  .target-grid-overseas{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .goal-global-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  .target-grid-overseas,.target-grid-domestic,.target-grid-overall{grid-template-columns:1fr!important}
+  .goal-global-grid{grid-template-columns:1fr}
+  .goal-edit-actions{flex-direction:column;align-items:stretch}
+  .goal-edit-actions-right{justify-content:flex-end}
+}
+
+
+/* ===== UNIFIED TARGET BUTTON / CARD COLOR FIX ===== */
+.target .target-input button.goal-action-btn,
+.target .target-input button[data-edit-goals],
+.target .target-input button[data-edit-service-goal]{
+  width:100%!important;
+  min-height:38px!important;
+  height:38px!important;
+  border:1px solid #29445f!important;
+  border-radius:10px!important;
+  background:#102237!important;
+  color:#f5f8ff!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+  font-size:11px!important;
+  font-weight:650!important;
+  cursor:pointer!important;
+}
+.target .target-input button.goal-action-btn:hover,
+.target .target-input button[data-edit-goals]:hover,
+.target .target-input button[data-edit-service-goal]:hover{
+  background:#17304b!important;
+  border-color:#4aa3ff!important;
+  color:#fff!important;
+  transform:translateY(-1px);
+  box-shadow:0 8px 20px rgba(0,0,0,.16)!important;
+}
+
+/* Distinct accent: overseas service must not reuse overseas-corp purple.
+   Revenue cards: dealer blue, SKD orange, corp purple.
+   Service cards: domestic service green, overseas service cyan. */
+.overseas-service-goal-card,
+.service-target.overseas-service-goal-card{
+  border-color:rgba(92,225,230,.26)!important;
+}
+.overseas-service-goal-card::before,
+.service-target.overseas-service-goal-card::before{
+  background:linear-gradient(180deg,#5ce1e6,#2fa8c1)!important;
+}
+.overseas-service-goal-card .service-target-pct,
+.service-target.overseas-service-goal-card .service-target-pct{
+  color:#5ce1e6!important;
+}
+.overseas-service-goal-card .service-target-progress{
+  background:rgba(92,225,230,.13)!important;
+}
+.overseas-service-goal-card .service-target-progress i{
+  background:linear-gradient(90deg,#5ce1e6,#2fa8c1)!important;
+}
+
+
+/* ===== EXECUTIVE AREA INTELLIGENCE ===== */
+.executive-area-grid{grid-template-columns:1.05fr 1.35fr!important}
+.executive-area-panel{min-width:0}
+.area-bar-wrap,.area-trend-wrap{position:relative;width:100%;height:280px;padding:4px 6px 0;box-sizing:border-box}
+.area-bar-wrap canvas,.area-trend-wrap canvas{width:100%!important;height:100%!important;display:block}
+.area-legend{padding:8px 17px 14px;flex-wrap:wrap}
+.area-legend span{margin-right:14px}
+
+
+
+
+
+
+/* ===== TARGET CARDS: TWO-ROW METRIC LAYOUT ===== */
+.target-stat{min-width:0!important}
+.target-stat:last-child{grid-column:1/-1}
+.target-stat b{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;min-width:0!important;font-size:clamp(12px,1.05vw,15px)!important}
+.target-stat span{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+@media(max-width:1400px){
+  .target-grid-overseas{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .executive-area-grid{grid-template-columns:1fr 1.1fr!important}
+  .area-bar-wrap,.area-trend-wrap{height:260px}
+}
+@media(max-width:850px){
+  .executive-area-grid{grid-template-columns:1fr!important}
+  
+  .area-bar-wrap,.area-trend-wrap{height:250px}
+}
+@media(max-width:520px){
+  .target-grid-overseas,.target-grid-domestic,.target-grid-overall{grid-template-columns:1fr!important}
+  .target-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .target-stat b{font-size:12px!important}
+}
+
+/* Executive Analytics: legend-only selection */
+.exec-area-select{
+  cursor:pointer!important;
+  user-select:none;
+  padding:5px 7px!important;
+  border-radius:8px!important;
+  transition:opacity .16s ease,transform .16s ease,background .16s ease;
+}
+.exec-area-select:hover{
+  transform:translateY(-1px);
+  background:rgba(74,163,255,.07);
+}
+.exec-area-select.selected{
+  background:rgba(74,163,255,.12)!important;
+  box-shadow:inset 3px 0 0 #4aa3ff;
+}
+
+
+/* Executive Analytics selection is handled directly by the bar rows. */
+#areaBarLegend,#areaTrendLegend{display:none!important}
+#areaBarCanvas{cursor:pointer}
+
+
+/* ===== ONLY REQUESTED COLOR FIXES ===== */
+.target-grid-overall .target:nth-child(1)::before{
+  background:var(--green)!important;
+}
+.target-grid-overall .target:nth-child(3)::before{
+  background:linear-gradient(180deg,#dbe5ef,#8396aa)!important;
+}
+.target-grid-overall .target:nth-child(3) .t-pct{
+  color:#dbe5ef!important;
+}
+.target-grid-overall .target:nth-child(3) .big-progress i{
+  background:linear-gradient(90deg,#dbe5ef,#8396aa)!important;
+}
+.target-grid-overall .target:nth-child(4)::before{
+  background:linear-gradient(180deg,#ff6f83,#d64561)!important;
+}
+.target-grid-overall .target:nth-child(4) .t-pct{
+  color:#ff6f83!important;
+}
+.target-grid-overall .target:nth-child(4) .big-progress i{
+  background:linear-gradient(90deg,#ff6f83,#d64561)!important;
+}
+.target-grid-overall .target:nth-child(5)::before{
+  background:linear-gradient(180deg,#5ce1e6,#2fa8c1)!important;
+}
+.target-grid-overall .target:nth-child(5) .t-pct{
+  color:#5ce1e6!important;
+}
+.target-grid-overall .target:nth-child(5) .big-progress i{
+  background:linear-gradient(90deg,#5ce1e6,#2fa8c1)!important;
+}
+.target-grid-overall .target:nth-child(6)::before{
+  background:linear-gradient(180deg,#9b8cff,#5c4fe0)!important;
+}
+.target-grid-overall .target:nth-child(6) .t-pct{
+  color:#9b8cff!important;
+}
+.target-grid-overall .target:nth-child(6) .big-progress i{
+  background:linear-gradient(90deg,#9b8cff,#5c4fe0)!important;
+}
+
+
+/* ===== TARGET CARDS: 총매출·서비스 칸을 카드 폭 가득 사용 (숫자가 잘리지 않게) =====
+   원래 3칸 격자에서 마지막 칸(순수 매출)만 한 줄 전체로 바꾸면서 격자가 3칸으로 남아,
+   위의 두 칸이 카드의 1/3씩만 차지하고 오른쪽이 비어 숫자가 ... 로 잘렸다.
+   → 2칸 격자로 바꿔 두 칸이 카드 폭을 반반 채우고, 카드가 좁으면 세로로 쌓는다. */
+.target{container-type:inline-size;container-name:targetcard}
+.target-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.target-stat:last-child{grid-column:1/-1}
+.target-stat b{overflow:visible!important;text-overflow:clip!important;font-size:clamp(13px,1.05vw,15px)!important}
+.target-stat span{overflow:visible!important;text-overflow:clip!important}
+@container targetcard (max-width:300px){
+  .target-stats{grid-template-columns:1fr!important}
+}
+
+/* ===== 담당자 상세 / 월간 요약 ===== */
+#owner .rank-row{cursor:pointer}
+#owner .rank-row:hover .name{color:var(--blue);text-decoration:underline;text-underline-offset:3px}
+.ow-hint{font-size:10px;color:var(--muted);margin:2px 5px 8px}
+.mx{position:fixed;inset:0;z-index:100;display:none;background:rgba(5,10,20,.62);backdrop-filter:blur(6px);overflow:auto;padding:28px 18px}
+.mx.open{display:block}
+.mx-card{max-width:1040px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,.35);padding:24px 26px 28px}
+.mx-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.mx-head h3{margin:0;font-size:24px;letter-spacing:-.04em}
+.mx-head p{margin:5px 0 0;font-size:12px;color:var(--muted)}
+.mx-close{height:34px;padding:0 14px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--text);font-size:12px}
+.mx-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.mx-kpi{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.mx-kpi .l{font-size:11px;color:var(--muted)}
+.mx-kpi .v{font-size:24px;font-weight:760;letter-spacing:-.04em;margin-top:6px;font-variant-numeric:tabular-nums}
+.mx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.mx-box{background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:14px 16px;min-width:0}
+.mx-box h4{margin:0 0 10px;font-size:13px}
+.mx-note{font-size:10.5px;color:var(--muted);margin-top:12px;line-height:1.5}
+@media (max-width:760px){.mx-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.mx-grid{grid-template-columns:1fr}}
+
+/* 월간 요약 */
+.rp-bar{max-width:1040px;margin:0 auto 14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 18px}
+.rp-bar b{font-size:13px}
+.rp-bar label{display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer}
+.rp-bar .select{height:34px}
+.rp-bar .sp{flex:1}
+.rp-btn{height:36px;padding:0 16px;border:0;border-radius:11px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}
+.rp-btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line);font-weight:600}
+.rp-sheet{--k:#1d1d1f;--m:#6e6e73;--l:#e5e5e7;--b:#007aff;--g:#1e8e3e;--r:#d33;
+  max-width:794px;margin:0 auto;background:#fff;color:var(--k);border-radius:6px;padding:34px 38px 30px;box-shadow:0 20px 60px rgba(0,0,0,.35);
+  font-size:11.5px;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rp-sheet h1{font-size:22px;margin:0;letter-spacing:-.04em}
+.rp-sheet .sub{color:var(--m);font-size:11px;margin:4px 0 14px}
+.rp-sheet h2{font-size:13px;margin:20px 0 8px;padding-bottom:5px;border-bottom:1.5px solid var(--k);letter-spacing:-.02em}
+.rp-sheet table{width:100%;border-collapse:collapse}
+.rp-sheet th{font-size:10px;color:var(--m);font-weight:600;text-align:right;padding:5px 6px;border-bottom:1px solid var(--l)}
+.rp-sheet td{padding:5px 6px;border-bottom:1px solid var(--l);text-align:right;font-variant-numeric:tabular-nums}
+.rp-sheet th:first-child,.rp-sheet td:first-child{text-align:left}
+.rp-sheet tr.tot td{font-weight:760;border-top:1.5px solid var(--k)}
+.rp-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.rp-kpi{border:1px solid var(--l);border-radius:10px;padding:10px 12px}
+.rp-kpi .l{font-size:10px;color:var(--m)}
+.rp-kpi .v{font-size:18px;font-weight:780;letter-spacing:-.04em;margin-top:3px}
+.rp-up{color:var(--g)}.rp-down{color:var(--r)}
+.rp-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.rp-cols h3{font-size:11px;margin:0 0 4px;color:var(--m)}
+.rp-cols td:first-child{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp-bar-cell{width:90px}
+.rp-trk{height:7px;background:var(--l);border-radius:9px;overflow:hidden}
+.rp-trk i{display:block;height:100%;background:var(--b);border-radius:9px}
+.rp-foot{margin-top:18px;padding-top:8px;border-top:1px solid var(--l);color:var(--m);font-size:9.5px;display:flex;justify-content:space-between}
+.rp-sheet .nodata{color:var(--m);padding:8px 0}
+@media print{
+  @page{size:A4;margin:12mm}
+  html,body{background:#fff!important}
+  body::before,body::after{display:none!important}
+  body.printing-report > *:not(#reportModal){display:none!important}
+  body.printing-report #reportModal{position:static!important;display:block!important;background:#fff!important;padding:0!important;overflow:visible!important;backdrop-filter:none!important}
+  body.printing-report .rp-bar{display:none!important}
+  body.printing-report .rp-sheet{font-size:10.5px!important}
+  body.printing-report .rp-sheet td{padding:3.5px 6px!important}
+  body.printing-report .rp-sheet h2{margin:13px 0 6px!important}
+  body.printing-report .rp-sheet .sub{margin-bottom:10px!important}
+  body.printing-report .rp-sheet{box-shadow:none!important;max-width:none!important;padding:0!important;border-radius:0!important}
+}
+</style>
+
+<style>#staleBanner{display:none!important}</style></head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div><h1>Sales Dashboard</h1><p>ERP 영업매출현황 기반 Dashboard</p></div></div>
+  <div class="header-actions">
+    <div class="mode" aria-label="영업 영역 선택">
+      <button data-mode="overseas">해외</button>
+      <button data-mode="domestic">국내</button>
+      <button data-mode="all">전체</button>
+    </div>
+    <select id="yearSelect" class="select" aria-label="연도 선택"></select>
+    <div id="csvLoader" class="csv-header">
+      <span id="csvStatus">CSV를 선택하세요.</span>
+      <label class="csv-select-btn">CSV 선택<input id="csvInput" type="file" accept=".csv,text/csv"></label>
+    </div>
+    <button class="export header-export" id="reportBtn" title="선택한 달의 요약을 한 페이지 PDF로 저장합니다">월간 요약</button>
+    <button class="export header-export" id="exportBtn" title="현재 선택 화면의 근거 데이터를 CSV로 저장">근거 CSV</button>
+  </div>
+</header>
+<main class="main">
+  <div id="staleBanner" style="display:none;margin:0 0 16px;padding:12px 18px;border-radius:14px;background:rgba(255,59,48,.10);border:1px solid rgba(255,59,48,.38);color:var(--red);font-size:13px;font-weight:650;line-height:1.55"></div>
+  <div class="head">
+    <div><h2 id="title">전체</h2><p id="subtitle">선택한 연도의 최신 ERP 매출 기준</p></div>
+  </div>
+  <div id="subnav" class="subnav"></div>
+
+  <div class="executive-hero" data-animate>
+    <div class="exec-card exec-main">
+      <div class="executive-badge">EXECUTIVE VIEW</div>
+      <div class="exec-eyebrow"><i class="live-dot"></i> SALES INTELLIGENCE</div>
+      <div class="exec-title" id="execTitle">Sales Performance</div>
+      <div class="exec-sub" id="execSub">선택한 연도와 영업 영역의 매출 흐름을 실시간으로 분석합니다.</div>
+      <div class="exec-metrics">
+        <div class="exec-metric"><span>Total Revenue</span><b id="execTotal">₩0</b></div>
+        <div class="exec-metric"><span>Pure Revenue</span><b id="execPure">₩0</b></div>
+        <div class="exec-metric"><span>Total Target Achievement</span><b id="execAchievement">0%</b></div>
+      </div>
+      <div class="exec-chart"><canvas id="execSpark"></canvas><div id="execSparkLabels" class="exec-spark-labels"></div></div>
+    </div>
+    <div class="exec-card exec-side">
+      <div class="gauge" id="execGauge">
+        <div class="gauge-center"><b id="gaugePct">0%</b><span>Total Target Achievement</span></div>
+      </div>
+      <div class="side-caption">
+  <strong id="gaugeLabel">—</strong><br>총매출 / 목표
+  <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line)">
+    <span style="font-size:9px;color:var(--muted)">순수 매출 달성률</span>
+    <b id="pureGaugePct" style="display:block;margin-top:4px;font-size:16px">—</b>
+  </div>
+</div>
+    </div>
+  </div>
+
+
+  <section class="kpi-grid">
+    <div class="kpi accent"><div class="label">총매출 <span id="rowCount"></span></div><div class="num" id="total">₩0</div><div class="sub">선택 영역 기준</div></div>
+    <div class="kpi success"><div class="label">서비스 매출</div><div class="num" id="service">₩0</div><div class="sub" id="serviceRate">전체의 0.0%</div></div>
+    <div class="kpi warning"><div class="label">순수 매출</div><div class="num" id="pure">₩0</div><div class="sub">서비스 제외</div></div>
+    <div class="kpi purple"><div class="label">목표</div><div class="num" id="goal">₩0</div><div class="sub">브라우저 저장 목표</div></div>
+    <div class="kpi"><div class="label">총매출 달성률</div><div class="num" id="pct">—</div><div class="sub">총매출 / 목표</div></div>
+  </section>
+
+  <section class="hero-score">
+    <div class="score-panel"><div class="score-title">현재 선택 영역</div><div class="score-top"><div><div class="score-value" id="heroTotal">₩0</div><div class="score-foot"><span id="heroPure">순수 매출 ₩0</span><span id="heroService">서비스 ₩0</span></div></div><div style="text-align:right"><div class="score-title">목표 달성</div><div class="score-pct" id="heroPct">—</div></div></div><div class="progress"><i id="heroBar" style="width:0%"></i></div><div class="score-foot"><span id="heroGoalText">목표 ₩0</span><span id="heroGapText">잔여 ₩0</span></div></div>
+    <div class="score-panel"><div class="score-title">데이터 상태</div><div style="margin-top:9px;font-size:23px;font-weight:750" id="updated">-</div><div class="sub" style="margin-top:8px">최근 ERP 데이터 갱신 시각</div><div style="margin-top:18px;font-size:12px;color:var(--muted)" id="sourceNote">-</div></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div><h3>영역별 목표 달성</h3><p>달성률은 총매출 기준이며, 서비스와 순수 매출을 함께 표시합니다.</p></div><span id="targetHint" style="font-size:10px;color:var(--muted)"></span></div>
+    <div id="targets" class="target-grid"></div>
+  </section>
+
+  <section class="section" id="recentSection">
+    <div class="section-head"><div><h3>최근 매출 10건</h3><p id="recentSubtitle">매출 전표 단위, 매출일 최신순입니다.</p></div><span id="recentHint" style="font-size:10px;color:var(--muted)"></span></div>
+    <div class="panel"><div class="recent-wrap"><table class="recent-table"><thead><tr><th class="rc-idx"></th><th>매출일</th><th>거래처</th><th>품목</th><th>구분</th><th class="rc-amt">금액</th></tr></thead><tbody id="recentBody"></tbody></table></div></div>
+  </section>
+
+  <section class="section" id="bigDealSection">
+    <div class="section-head"><div><h3>큰 건 Top 5</h3><p id="bigDealSubtitle">금액이 큰 매출 전표 순서입니다.</p></div><span id="bigDealHint" style="font-size:10px;color:var(--muted)"></span></div>
+    <div class="panel"><div class="recent-wrap"><table class="recent-table"><thead><tr><th class="rc-idx"></th><th>매출일</th><th>거래처</th><th>품목</th><th>구분</th><th class="rc-amt">금액</th></tr></thead><tbody id="bigBody"></tbody></table></div></div>
+  </section>
+
+  <section class="section" id="profitSection">
+    <div class="section-head"><div><h3>이익 현황</h3><p id="profitSubtitle">PROFIT_AMT 기준 이익과 이익률입니다.</p></div><span id="profitHint" style="font-size:10px;color:var(--muted)"></span></div>
+    <section class="kpi-grid three" style="margin-bottom:12px">
+      <div class="kpi accent"><div class="label">이익 합계</div><div class="num" id="pfTotal">₩0</div><div class="sub" id="pfTotalSub">선택 영역 기준</div></div>
+      <div class="kpi success"><div class="label">이익률</div><div class="num" id="pfRate">—</div><div class="sub">이익 ÷ 매출</div></div>
+      <div class="kpi"><div class="label">작년 이익률</div><div class="num" id="pfPrev">—</div><div class="sub" id="pfPrevSub">작년 연간 기준</div></div>
+    </section>
+    <div class="grid2">
+      <div class="panel"><div class="panel-head"><h4>이익 상위 거래처</h4><span>이익 · 이익률</span></div><div id="pfTop"></div></div>
+      <div class="panel"><div class="panel-head"><h4>이익률 낮은 전표</h4><span>이익률 · 매출</span></div><div id="pfLow"></div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div><h3>매출 추이</h3><p id="trendHint">월별 실적과 분기별 실적</p></div></div>
+    <div class="grid2">
+      <div class="panel"><div class="panel-head"><h4>월별 매출</h4><span>1월 — 12월</span></div><div class="panel-body"><div id="months" class="months"></div></div></div>
+      <div class="panel"><div class="panel-head"><h4>분기별 매출</h4><span>Q1 — Q4</span></div><div class="panel-body"><table class="table" id="quarters"></table></div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div><h3>Executive Analytics</h3><p id="execAnalyticsSubtitle">영업 영역별 매출 규모와 월별 변화를 비교합니다.</p></div><span class="pulse" style="font-size:10px;color:var(--blue2)">AREA INTELLIGENCE</span></div>
+    <div class="chart-grid executive-area-grid">
+      <div class="panel chart-panel executive-area-panel">
+        <div class="analytics-toolbar panel-head"><h4 id="areaChartTitle">Area Revenue Mix</h4><span id="areaChartTag" class="tag">AREA COMPARISON</span></div>
+        <div class="area-bar-wrap"><canvas id="areaBarCanvas"></canvas></div>
+        <div id="areaBarLegend" class="chart-legend area-legend"></div>
+      </div>
+      <div class="panel chart-panel executive-area-panel">
+        <div class="analytics-toolbar panel-head"><h4 id="areaTrendTitle">Monthly Area Trend</h4><span id="areaTrendTag" class="tag">MONTHLY TREND</span></div>
+        <div class="area-trend-wrap"><canvas id="areaTrendCanvas"></canvas></div>
+        <div id="areaTrendLegend" class="chart-legend area-legend"></div>
+      </div>
+    </div>
+    
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div><h3>매출 인사이트</h3><p>전체 매출 구성과 국내 / 해외 비중을 한눈에 확인합니다.</p></div><span class="pulse" style="font-size:10px;color:var(--blue2)">LIVE ANALYTICS</span></div>
+    <div class="visual-grid">
+      <div class="panel visual-card">
+        <div class="panel-head"><h4>매출 구성</h4><span>순수 매출 vs 서비스</span></div>
+        <div class="donut-wrap">
+          <div id="mixDonut" class="donut"><div class="donut-center"><b id="mixPct">0%</b><span>순수 매출</span></div></div>
+          <div id="mixLegend" class="legend"></div>
+        </div>
+      </div>
+      <div class="panel visual-card">
+        <div class="panel-head"><h4 id="segmentChartTitle">해외영업 구성</h4><span>선택 영역 기준</span></div>
+        <div class="donut-wrap">
+          <div id="segmentDonut" class="donut"><div class="donut-center"><b id="segmentPct">0%</b><span id="segmentCenterLabel">전체</span></div></div>
+          <div id="segmentLegend" class="legend"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div><h3>매출 구성</h3><p>선택한 영역의 주요 거래처, 제품, 지역, 영업담당</p></div></div>
+    <div class="grid3">
+      <div class="panel"><div class="panel-head"><h4>거래처</h4><span>Top 8</span></div><div class="panel-body"><div id="customer" class="rank"></div></div></div>
+      <div class="panel"><div class="panel-head"><h4>제품</h4><span>Top 8</span></div><div class="panel-body"><div id="product" class="rank"></div></div></div>
+      <div class="panel"><div class="panel-head"><h4>국가</h4><span>Top 8</span></div><div class="panel-body"><div id="country" class="rank"></div></div></div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="grid2">
+      <div class="panel"><div class="panel-head"><h4 id="regionTitle">지역</h4><span>Top 8</span></div><div class="panel-body"><div id="region" class="rank"></div></div></div>
+      <div class="panel"><div class="panel-head"><h4>영업담당</h4><span>선택 연도 실매출 기준</span></div><div class="panel-body"><div id="ownerToggle" class="seg-mini"><button type="button" data-corp="exclude">해외법인 제외</button><button type="button" data-corp="include">해외법인 포함</button></div><div id="owner" class="rank"></div></div></div>
+    </div>
+  </section>
+
+  <section class="section" id="custChangeSection">
+    <div class="section-head"><div><h3>거래처 변화</h3><p id="custChangeSubtitle">올해 새로 거래를 시작한 거래처와, 작년에는 거래했지만 올해는 아직 거래가 없는 거래처입니다.</p></div><span id="custChangeHint" style="font-size:10px;color:var(--muted)"></span></div>
+    <div class="cust-grid">
+      <div class="panel"><div class="panel-head"><h4>신규 거래처</h4><span>올해 첫 거래</span></div><div class="cc-sum" id="ccNewSum"></div><div id="ccNew"></div></div>
+      <div class="panel"><div class="panel-head"><h4>거래가 끊긴 거래처</h4><span>작년 거래 · 올해 없음</span></div><div class="cc-sum" id="ccLostSum"></div><div id="ccLost"></div></div>
+    </div>
+  </section>
+
+  <section class="section" id="concSection">
+    <div class="section-head"><div><h3>거래처 집중도 · 모델별 매출</h3><p id="concSubtitle">상위 거래처에 매출이 얼마나 몰려 있는지와, 모델별 매출 순위입니다.</p></div></div>
+    <div class="grid2">
+      <div class="panel"><div class="panel-head"><h4>거래처 집중도</h4><span>상위 5곳 비중</span></div><div id="concBig" class="conc-big"></div><div class="panel-body"><div id="concRank" class="rank"></div></div></div>
+      <div class="panel"><div class="panel-head"><h4>모델별 매출</h4><span>Top 8</span></div><div class="panel-body"><div id="modelRank" class="rank"></div></div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div><h3>Funnel</h3><p>CSV에 연결된 수주 Funnel 기준</p></div></div>
+    <div class="grid2">
+      <div class="panel"><div class="panel-head"><h4>연결 매출</h4><span id="funnelCount">0개</span></div><div class="panel-body"><div style="font-size:34px;font-weight:800" id="funnelAmount">₩0</div><div class="sub" style="margin-top:6px">실제 매출에 관련수주펀넬번호가 연결된 금액</div></div></div>
+      <div class="panel"><div class="panel-head"><h4>메모</h4></div><div class="panel-body"><div class="sub">현재 CSV에는 Funnel Stage별 예상금액 구조가 없으므로, 연결된 매출 이력만 표시합니다.</div></div></div>
+    </div>
+  </section>
+
+  <div class="footer">데이터 원천: PY가 추출한 `영업매출현황.csv` 1개만 사용합니다. 동일 거래 중복행은 PY에서 제거된 데이터를 사용합니다. 2026년부터 해외 + 서비스 매출은 영업담당 집계를 2026-10-08까지 김서연, 2026-10-09부터 이도현로 귀속합니다. 목표값은 브라우저에 연도별로 저장됩니다.</div>
+</main>
+</div>
+<div class="mx" id="ownerModal" role="dialog" aria-modal="true" aria-label="담당자별 상세">
+  <div class="mx-card" id="ownerCard"></div>
+</div>
+<div class="mx" id="reportModal" role="dialog" aria-modal="true" aria-label="월간 요약">
+  <div class="rp-bar">
+    <b>월간 요약</b>
+    <select id="rpMonth" class="select" aria-label="월 선택"></select>
+    <label><input type="checkbox" id="rpTarget" checked> 목표 달성 현황</label>
+    <label><input type="checkbox" id="rpTop" checked> 상위 거래처·제품·담당</label>
+    <label><input type="checkbox" id="rpTrend" checked> 월별 추이·전월·전년 동월 비교</label>
+    <span class="sp"></span>
+    <button class="rp-btn" id="rpPrint">PDF로 저장</button>
+    <button class="rp-btn ghost" id="rpClose">닫기</button>
+  </div>
+  <div class="rp-sheet" id="reportSheet"></div>
+</div>
+<script>
+const DATA={"fields":["year","month","quarter","amount","profit","margin","customer","country","region","itemCode","itemName","model","owner","dept","deptClass","projectNo","projectName","funnelNo","updated","billNum","billSeq","orderType","billTypeName","g1","g2","g3","saleDate","continent","salesClass","customCode"],"rows":[["2025","1","1",23000000.0,2760000.0,0.0,"(주)한빛의료","KR","","I","Humidifier","Accessories","김서연","D","x","P0","PJT-0","","2025-01-05 09:00:00","B25000","1","1","t","국내","대리점","서비스","2025-01-05","Asia","x","C1"],["2025","1","1",30000000.0,6600000.0,0.0,"(주)한빛의료","KR","","I","Alpha System","C-50","김서연","D","x","P1","PJT-1","","2025-01-05 09:00:00","B25000","2","1","t","국내","대리점","장비","2025-01-05","Asia","x","C1"],["2025","1","1",24000000.0,6720000.0,0.0,"Pacific Biomed","필리핀","아시아","I","Service Kit","B-200","김서연","D","x","P0","PJT-0","","2025-01-16 09:00:00","B25001","1","1","t","해외","대리점","장비","2025-01-16","Asia","x","C1"],["2025","1","1",37000000.0,-740000.0,0.0,"Berlin Klinik","독일","유럽","I","Alpha System","A-750","김서연","D","x","P0","PJT-0","","2025-01-27 09:00:00","B25002","1","1","t","해외","대리점","서비스","2025-01-27","Asia","x","C1"],["2025","2","1",18000000.0,3960000.0,0.0,"Pacific Biomed","필리핀","아시아","I","Alpha System","Accessories","김서연","D","x","P0","PJT-0","","2025-02-07 09:00:00","B25003","1","1","t","해외","대리점","장비","2025-02-07","Asia","x","C1"],["2025","2","1",25000000.0,3000000.0,0.0,"Pacific Biomed","필리핀","아시아","I","Alpha System","Accessories","김서연","D","x","P1","PJT-1","","2025-02-07 09:00:00","B25003","2","1","t","해외","대리점","장비","2025-02-07","Asia","x","C1"],["2025","2","1",40000000.0,14000000.0,0.0,"Alpha Medical","이집트","아프리카","I","Humidifier","C-50","김서연","D","x","P0","PJT-0","","2025-02-18 09:00:00","B25004","1","1","t","해외","대리점","장비","2025-02-18","Asia","x","C1"],["2025","3","1",1000000.0,50000.0,0.0,"Pacific Biomed","필리핀","아시아","I","Alpha System","Accessories","김서연","D","x","P0","PJT-0","","2025-03-01 09:00:00","B25005","1","1","t","해외","대리점","장비","2025-03-01","Asia","x","C1"],["2025","3","1",19000000.0,-380000.0,0.0,"Pacific Biomed","필리핀","아시아","I","Circuit Set","A-750","김서연","D","x","P0","PJT-0","","2025-03-12 09:00:00","B25006","1","1","t","해외","대리점","장비","2025-03-12","Asia","x","C1"],["2025","3","1",12000000.0,-240000.0,0.0,"(주)한빛의료","KR","","I","Alpha System","D-100","김서연","D","x","P0","PJT-0","","2025-03-23 09:00:00","B25007","1","1","t","국내","대리점","장비","2025-03-23","Asia","x","C1"],["2025","4","1",2000000.0,560000.0,0.0,"Berlin Klinik","독일","유럽","I","Circuit Set","D-100","김서연","D","x","P0","PJT-0","","2025-04-03 09:00:00","B25008","1","1","t","해외","대리점","장비","2025-04-03","Asia","x","C1"],["2025","4","1",10000000.0,-200000.0,0.0,"Berlin Klinik","독일","유럽","I","Circuit Set","D-100","김서연","D","x","P1","PJT-1","","2025-04-03 09:00:00","B25008","2","1","t","해외","대리점","서비스","2025-04-03","Asia","x","C1"],["2025","4","1",39000000.0,10920000.0,0.0,"Old Partner Ltd","인도","아시아","I","Circuit Set","B-200","김서연","D","x","P0","PJT-0","","2025-04-14 09:00:00","B25009","1","1","t","해외","대리점","서비스","2025-04-14","Asia","x","C1"],["2025","4","1",31000000.0,8680000.0,0.0,"Old Partner Ltd","인도","아시아","I","Circuit Set","A-750","김서연","D","x","P0","PJT-0","","2025-04-25 09:00:00","B25010","1","1","t","해외","대리점","서비스","2025-04-25","Asia","x","C1"],["2025","4","1",31000000.0,10850000.0,0.0,"Old Partner Ltd","인도","아시아","I","Alpha System","B-200","김서연","D","x","P1","PJT-1","","2025-04-25 09:00:00","B25010","2","1","t","해외","대리점","서비스","2025-04-25","Asia","x","C1"],["2025","5","1",26000000.0,1300000.0,0.0,"Alpha Medical","이집트","아프리카","I","Beta Unit","Accessories","김서연","D","x","P0","PJT-0","","2025-05-06 09:00:00","B25011","1","1","t","해외","대리점","장비","2025-05-06","Asia","x","C1"],["2025","5","1",27000000.0,9450000.0,0.0,"Alpha Medical","이집트","아프리카","I","Circuit Set","D-100","김서연","D","x","P1","PJT-1","","2025-05-06 09:00:00","B25011","2","1","t","해외","대리점","장비","2025-05-06","Asia","x","C1"],["2025","5","1",29000000.0,-580000.0,0.0,"Lost Trading","브라질","남미","I","Beta Unit","A-750","김서연","D","x","P0","PJT-0","","2025-05-17 09:00:00","B25012","1","1","t","해외","대리점","장비","2025-05-17","Asia","x","C1"],["2025","5","1",8000000.0,1760000.0,0.0,"(주)한빛의료","KR","","I","Alpha System","B-200","김서연","D","x","P0","PJT-0","","2025-05-28 09:00:00","B25013","1","1","t","국내","대리점","장비","2025-05-28","Asia","x","C1"],["2025","6","1",33000000.0,-660000.0,0.0,"Berlin Klinik","독일","유럽","I","Circuit Set","B-200","김서연","D","x","P0","PJT-0","","2025-06-08 09:00:00","B25014","1","1","t","해외","대리점","장비","2025-06-08","Asia","x","C1"],["2025","6","1",17000000.0,-340000.0,0.0,"Berlin Klinik","독일","유럽","I","Service Kit","D-100","김서연","D","x","P1","PJT-1","","2025-06-08 09:00:00","B25014","2","1","t","해외","대리점","서비스","2025-06-08","Asia","x","C1"],["2025","6","1",19000000.0,6650000.0,0.0,"Gone Co","튀르키예","유럽","I","Beta Unit","C-50","김서연","D","x","P0","PJT-0","","2025-06-19 09:00:00","B25015","1","1","t","해외","대리점","장비","2025-06-19","Asia","x","C1"],["2025","6","1",6000000.0,1680000.0,0.0,"Gone Co","튀르키예","유럽","I","Alpha System","D-100","김서연","D","x","P1","PJT-1","","2025-06-19 09:00:00","B25015","2","1","t","해외","대리점","장비","2025-06-19","Asia","x","C1"],["2025","6","1",10000000.0,2200000.0,0.0,"(주)한빛의료","KR","","I","Circuit Set","C-50","김서연","D","x","P0","PJT-0","","2025-06-30 09:00:00","B25016","1","1","t","국내","대리점","장비","2025-06-30","Asia","x","C1"],["2025","6","1",35000000.0,12250000.0,0.0,"(주)한빛의료","KR","","I","Beta Unit","B-200","김서연","D","x","P1","PJT-1","","2025-06-30 09:00:00","B25016","2","1","t","국내","대리점","장비","2025-06-30","Asia","x","C1"],["2025","7","1",12000000.0,-240000.0,0.0,"Old Partner Ltd","인도","아시아","I","Beta Unit","A-750","김서연","D","x","P0","PJT-0","","2025-07-11 09:00:00","B25017","1","1","t","해외","대리점","장비","2025-07-11","Asia","x","C1"],["2025","7","1",20000000.0,2400000.0,0.0,"Old Partner Ltd","인도","아시아","I","Service Kit","A-750","김서연","D","x","P1","PJT-1","","2025-07-11 09:00:00","B25017","2","1","t","해외","대리점","서비스","2025-07-11","Asia","x","C1"],["2025","7","1",39000000.0,4680000.0,0.0,"Alpha Medical","이집트","아프리카","I","Humidifier","D-100","김서연","D","x","P0","PJT-0","","2025-07-22 09:00:00","B25018","1","1","t","해외","대리점","장비","2025-07-22","Asia","x","C1"],["2025","8","1",39000000.0,10920000.0,0.0,"Alpha Medical","이집트","아프리카","I","Circuit Set","A-750","김서연","D","x","P0","PJT-0","","2025-08-02 09:00:00","B25019","1","1","t","해외","대리점","장비","2025-08-02","Asia","x","C1"],["2025","8","1",10000000.0,2800000.0,0.0,"Berlin Klinik","독일","유럽","I","Beta Unit","D-100","김서연","D","x","P0","PJT-0","","2025-08-13 09:00:00","B25020","1","1","t","해외","대리점","장비","2025-08-13","Asia","x","C1"],["2025","8","1",3000000.0,-60000.0,0.0,"Berlin Klinik","독일","유럽","I","Service Kit","A-750","김서연","D","x","P1","PJT-1","","2025-08-13 09:00:00","B25020","2","1","t","해외","대리점","장비","2025-08-13","Asia","x","C1"],["2025","8","1",37000000.0,1850000.0,0.0,"Pacific Biomed","필리핀","아시아","I","Alpha System","A-750","김서연","D","x","P0","PJT-0","","2025-08-24 09:00:00","B25021","1","1","t","해외","대리점","장비","2025-08-24","Asia","x","C1"],["2025","9","1",7000000.0,2450000.0,0.0,"Lost Trading","브라질","남미","I","Alpha System","Accessories","김서연","D","x","P0","PJT-0","","2025-09-04 09:00:00","B25022","1","1","t","해외","대리점","장비","2025-09-04","Asia","x","C1"],["2025","9","1",10000000.0,2800000.0,0.0,"Lost Trading","브라질","남미","I","Beta Unit","B-200","김서연","D","x","P1","PJT-1","","2025-09-04 09:00:00","B25022","2","1","t","해외","대리점","장비","2025-09-04","Asia","x","C1"],["2025","9","1",30000000.0,6600000.0,0.0,"Old Partner Ltd","인도","아시아","I","Humidifier","A-750","김서연","D","x","P0","PJT-0","","2025-09-15 09:00:00","B25023","1","1","t","해외","대리점","장비","2025-09-15","Asia","x","C1"],["2025","9","1",32000000.0,11200000.0,0.0,"(주)한빛의료","KR","","I","Circuit Set","B-200","김서연","D","x","P0","PJT-0","","2025-09-26 09:00:00","B25024","1","1","t","국내","대리점","장비","2025-09-26","Asia","x","C1"],["2025","9","1",19000000.0,950000.0,0.0,"(주)한빛의료","KR","","I","Service Kit","A-750","김서연","D","x","P1","PJT-1","","2025-09-26 09:00:00","B25024","2","1","t","국내","대리점","장비","2025-09-26","Asia","x","C1"],["2025","10","1",25000000.0,1250000.0,0.0,"Pacific Biomed","필리핀","아시아","I","Humidifier","A-750","김서연","D","x","P0","PJT-0","","2025-10-07 09:00:00","B25025","1","1","t","해외","대리점","장비","2025-10-07","Asia","x","C1"],["2025","10","1",22000000.0,1100000.0,0.0,"Gone Co","튀르키예","유럽","I","Alpha System","D-100","김서연","D","x","P0","PJT-0","","2025-10-18 09:00:00","B25026","1","1","t","해외","대리점","서비스","2025-10-18","Asia","x","C1"],["2025","10","1",18000000.0,900000.0,0.0,"Gone Co","튀르키예","유럽","I","Humidifier","B-200","김서연","D","x","P1","PJT-1","","2025-10-18 09:00:00","B25026","2","1","t","해외","대리점","장비","2025-10-18","Asia","x","C1"],["2025","10","1",5000000.0,600000.0,0.0,"Lost Trading","브라질","남미","I","Circuit Set","A-750","김서연","D","x","P0","PJT-0","","2025-10-29 09:00:00","B25027","1","1","t","해외","대리점","장비","2025-10-29","Asia","x","C1"],["2025","10","1",3000000.0,360000.0,0.0,"Lost Trading","브라질","남미","I","Circuit Set","B-200","김서연","D","x","P1","PJT-1","","2025-10-29 09:00:00","B25027","2","1","t","해외","대리점","장비","2025-10-29","Asia","x","C1"],["2025","11","1",32000000.0,-640000.0,0.0,"Gone Co","튀르키예","유럽","I","Circuit Set","A-750","김서연","D","x","P0","PJT-0","","2025-11-09 09:00:00","B25028","1","1","t","해외","대리점","장비","2025-11-09","Asia","x","C1"],["2025","11","1",19000000.0,-380000.0,0.0,"Gone Co","튀르키예","유럽","I","Circuit Set","Accessories","김서연","D","x","P1","PJT-1","","2025-11-09 09:00:00","B25028","2","1","t","해외","대리점","장비","2025-11-09","Asia","x","C1"],["2025","11","1",31000000.0,8680000.0,0.0,"(주)한빛의료","KR","","I","Humidifier","B-200","김서연","D","x","P0","PJT-0","","2025-11-20 09:00:00","B25029","1","1","t","국내","대리점","장비","2025-11-20","Asia","x","C1"],["2026","10","1",18000000.0,900000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Service Kit","A-750","김서연","D","x","P0","PJT-0","","2026-10-09 09:00:00","B26000","1","1","t","해외","대리점","장비","2026-10-09","Asia","x","C1"],["2026","10","1",33000000.0,11550000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Circuit Set","C-50","김서연","D","x","P1","PJT-1","","2026-10-09 09:00:00","B26000","2","1","t","해외","대리점","장비","2026-10-09","Asia","x","C1"],["2026","10","1",23000000.0,1150000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Service Kit","Accessories","김서연","D","x","P2","PJT-2","","2026-10-09 09:00:00","B26000","3","1","t","해외","대리점","장비","2026-10-09","Asia","x","C1"],["2026","10","1",29000000.0,8120000.0,0.0,"서울메디칼","KR","","I","Circuit Set","C-50","김서연","D","x","P0","PJT-0","","2026-10-04 09:00:00","B26001","1","1","t","국내","대리점","장비","2026-10-04","Asia","x","C1"],["2026","9","1",34000000.0,-680000.0,0.0,"Nordic Care AB","스웨덴","유럽","I","Alpha System","Accessories","김서연","D","x","P0","PJT-0","","2026-09-29 09:00:00","B26002","1","1","t","해외","대리점","서비스","2026-09-29","Asia","x","C1"],["2026","9","1",19000000.0,6650000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Beta Unit","A-750","김서연","D","x","P0","PJT-0","","2026-09-24 09:00:00","B26003","1","1","t","해외","대리점","장비","2026-09-24","Asia","x","C1"],["2026","9","1",27000000.0,-540000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Alpha System","D-100","김서연","D","x","P1","PJT-1","","2026-09-24 09:00:00","B26003","2","1","t","해외","대리점","장비","2026-09-24","Asia","x","C1"],["2026","9","1",27000000.0,7560000.0,0.0,"Nordic Care AB","스웨덴","유럽","I","Circuit Set","B-200","김서연","D","x","P0","PJT-0","","2026-09-19 09:00:00","B26004","1","1","t","해외","대리점","장비","2026-09-19","Asia","x","C1"],["2026","9","1",18000000.0,900000.0,0.0,"Nordic Care AB","스웨덴","유럽","I","Beta Unit","Accessories","김서연","D","x","P1","PJT-1","","2026-09-19 09:00:00","B26004","2","1","t","해외","대리점","서비스","2026-09-19","Asia","x","C1"],["2026","9","1",38000000.0,13300000.0,0.0,"Nordic Care AB","스웨덴","유럽","I","Service Kit","C-50","김서연","D","x","P2","PJT-2","","2026-09-19 09:00:00","B26004","3","1","t","해외","대리점","장비","2026-09-19","Asia","x","C1"],["2026","9","1",12000000.0,-240000.0,0.0,"Pacific Biomed","필리핀","아시아","I","Beta Unit","Accessories","김서연","D","x","P0","PJT-0","","2026-09-14 09:00:00","B26005","1","1","t","해외","대리점","장비","2026-09-14","Asia","x","C1"],["2026","9","1",4000000.0,200000.0,0.0,"Pacific Biomed","필리핀","아시아","I","Alpha System","Accessories","김서연","D","x","P0","PJT-0","","2026-09-09 09:00:00","B26006","1","1","t","해외","대리점","서비스","2026-09-09","Asia","x","C1"],["2026","9","1",13000000.0,-260000.0,0.0,"Pacific Biomed","필리핀","아시아","I","Humidifier","A-750","김서연","D","x","P0","PJT-0","","2026-09-04 09:00:00","B26007","1","1","t","해외","대리점","서비스","2026-09-04","Asia","x","C1"],["2026","9","1",30000000.0,6600000.0,0.0,"Pacific Biomed","필리핀","아시아","I","Circuit Set","A-750","김서연","D","x","P1","PJT-1","","2026-09-04 09:00:00","B26007","2","1","t","해외","대리점","장비","2026-09-04","Asia","x","C1"],["2026","8","1",38000000.0,1900000.0,0.0,"Nordic Care AB","스웨덴","유럽","I","Alpha System","C-50","김서연","D","x","P0","PJT-0","","2026-08-30 09:00:00","B26008","1","1","t","해외","대리점","장비","2026-08-30","Asia","x","C1"],["2026","8","1",23000000.0,2760000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Service Kit","B-200","김서연","D","x","P0","PJT-0","","2026-08-25 09:00:00","B26009","1","1","t","해외","대리점","장비","2026-08-25","Asia","x","C1"],["2026","8","1",8000000.0,960000.0,0.0,"서울메디칼","KR","","I","Humidifier","B-200","김서연","D","x","P0","PJT-0","","2026-08-20 09:00:00","B26010","1","1","t","국내","대리점","장비","2026-08-20","Asia","x","C1"],["2026","8","1",3000000.0,150000.0,0.0,"서울메디칼","KR","","I","Humidifier","A-750","김서연","D","x","P1","PJT-1","","2026-08-20 09:00:00","B26010","2","1","t","국내","대리점","장비","2026-08-20","Asia","x","C1"],["2026","8","1",35000000.0,4200000.0,0.0,"Alpha Medical","이집트","아프리카","I","Humidifier","Accessories","김서연","D","x","P0","PJT-0","","2026-08-15 09:00:00","B26011","1","1","t","해외","대리점","장비","2026-08-15","Asia","x","C1"],["2026","8","1",38000000.0,8360000.0,0.0,"Alpha Medical","이집트","아프리카","I","Circuit Set","A-750","김서연","D","x","P1","PJT-1","","2026-08-15 09:00:00","B26011","2","1","t","해외","대리점","장비","2026-08-15","Asia","x","C1"],["2026","8","1",27000000.0,3240000.0,0.0,"서울메디칼","KR","","I","Service Kit","A-750","김서연","D","x","P0","PJT-0","","2026-08-10 09:00:00","B26012","1","1","t","국내","대리점","장비","2026-08-10","Asia","x","C1"],["2026","8","1",24000000.0,6720000.0,0.0,"(주)한빛의료","KR","","I","Service Kit","B-200","김서연","D","x","P0","PJT-0","","2026-08-05 09:00:00","B26013","1","1","t","국내","대리점","서비스","2026-08-05","Asia","x","C1"],["2026","8","1",39000000.0,4680000.0,0.0,"(주)한빛의료","KR","","I","Service Kit","C-50","김서연","D","x","P1","PJT-1","","2026-08-05 09:00:00","B26013","2","1","t","국내","대리점","장비","2026-08-05","Asia","x","C1"],["2026","8","1",13000000.0,2860000.0,0.0,"(주)한빛의료","KR","","I","Alpha System","A-750","김서연","D","x","P2","PJT-2","","2026-08-05 09:00:00","B26013","3","1","t","국내","대리점","장비","2026-08-05","Asia","x","C1"],["2026","7","1",1000000.0,220000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Service Kit","C-50","김서연","D","x","P0","PJT-0","","2026-07-31 09:00:00","B26014","1","1","t","해외","대리점","서비스","2026-07-31","Asia","x","C1"],["2026","7","1",37000000.0,12950000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Humidifier","Accessories","김서연","D","x","P1","PJT-1","","2026-07-31 09:00:00","B26014","2","1","t","해외","대리점","장비","2026-07-31","Asia","x","C1"],["2026","7","1",21000000.0,7350000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Humidifier","A-750","김서연","D","x","P2","PJT-2","","2026-07-31 09:00:00","B26014","3","1","t","해외","대리점","장비","2026-07-31","Asia","x","C1"],["2026","7","1",32000000.0,3840000.0,0.0,"Saigon Medical","베트남","아시아","I","Circuit Set","Accessories","김서연","D","x","P0","PJT-0","","2026-07-26 09:00:00","B26015","1","1","t","해외","대리점","장비","2026-07-26","Asia","x","C1"],["2026","7","1",25000000.0,3000000.0,0.0,"(주)한빛의료","KR","","I","Alpha System","D-100","김서연","D","x","P0","PJT-0","","2026-07-21 09:00:00","B26016","1","1","t","국내","대리점","장비","2026-07-21","Asia","x","C1"],["2026","7","1",17000000.0,3740000.0,0.0,"(주)한빛의료","KR","","I","Circuit Set","B-200","김서연","D","x","P1","PJT-1","","2026-07-21 09:00:00","B26016","2","1","t","국내","대리점","장비","2026-07-21","Asia","x","C1"],["2026","7","1",21000000.0,1050000.0,0.0,"Saigon Medical","베트남","아시아","I","Circuit Set","A-750","김서연","D","x","P0","PJT-0","","2026-07-16 09:00:00","B26017","1","1","t","해외","대리점","장비","2026-07-16","Asia","x","C1"],["2026","7","1",31000000.0,3720000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Beta Unit","B-200","김서연","D","x","P0","PJT-0","","2026-07-11 09:00:00","B26018","1","1","t","해외","대리점","서비스","2026-07-11","Asia","x","C1"],["2026","7","1",16000000.0,5600000.0,0.0,"Nordic Care AB","스웨덴","유럽","I","Circuit Set","D-100","김서연","D","x","P0","PJT-0","","2026-07-06 09:00:00","B26019","1","1","t","해외","대리점","서비스","2026-07-06","Asia","x","C1"],["2026","7","1",9000000.0,450000.0,0.0,"Nordic Care AB","스웨덴","유럽","I","Service Kit","C-50","김서연","D","x","P1","PJT-1","","2026-07-06 09:00:00","B26019","2","1","t","해외","대리점","서비스","2026-07-06","Asia","x","C1"],["2026","7","1",18000000.0,900000.0,0.0,"Nordic Care AB","스웨덴","유럽","I","Alpha System","C-50","김서연","D","x","P0","PJT-0","","2026-07-01 09:00:00","B26020","1","1","t","해외","대리점","장비","2026-07-01","Asia","x","C1"],["2026","7","1",3000000.0,840000.0,0.0,"Nordic Care AB","스웨덴","유럽","I","Alpha System","C-50","김서연","D","x","P1","PJT-1","","2026-07-01 09:00:00","B26020","2","1","t","해외","대리점","장비","2026-07-01","Asia","x","C1"],["2026","7","1",10000000.0,2800000.0,0.0,"Nordic Care AB","스웨덴","유럽","I","Circuit Set","C-50","김서연","D","x","P2","PJT-2","","2026-07-01 09:00:00","B26020","3","1","t","해외","대리점","장비","2026-07-01","Asia","x","C1"],["2026","6","1",34000000.0,11900000.0,0.0,"Nordic Care AB","스웨덴","유럽","I","Humidifier","A-750","김서연","D","x","P0","PJT-0","","2026-06-26 09:00:00","B26021","1","1","t","해외","대리점","장비","2026-06-26","Asia","x","C1"],["2026","6","1",8000000.0,2240000.0,0.0,"Nordic Care AB","스웨덴","유럽","I","Beta Unit","C-50","김서연","D","x","P1","PJT-1","","2026-06-26 09:00:00","B26021","2","1","t","해외","대리점","장비","2026-06-26","Asia","x","C1"],["2026","6","1",35000000.0,9800000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Circuit Set","A-750","김서연","D","x","P0","PJT-0","","2026-06-21 09:00:00","B26022","1","1","t","해외","대리점","장비","2026-06-21","Asia","x","C1"],["2026","6","1",34000000.0,1700000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Beta Unit","B-200","김서연","D","x","P1","PJT-1","","2026-06-21 09:00:00","B26022","2","1","t","해외","대리점","장비","2026-06-21","Asia","x","C1"],["2026","6","1",38000000.0,13300000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Alpha System","A-750","김서연","D","x","P0","PJT-0","","2026-06-16 09:00:00","B26023","1","1","t","해외","대리점","서비스","2026-06-16","Asia","x","C1"],["2026","6","1",17000000.0,5950000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Humidifier","D-100","김서연","D","x","P1","PJT-1","","2026-06-16 09:00:00","B26023","2","1","t","해외","대리점","장비","2026-06-16","Asia","x","C1"],["2026","6","1",7000000.0,1960000.0,0.0,"New Horizon Med","카자흐스탄","아시아","I","Humidifier","D-100","김서연","D","x","P2","PJT-2","","2026-06-16 09:00:00","B26023","3","1","t","해외","대리점","서비스","2026-06-16","Asia","x","C1"],["2026","6","1",39000000.0,8580000.0,0.0,"Saigon Medical","베트남","아시아","I","Humidifier","Accessories","김서연","D","x","P0","PJT-0","","2026-06-11 09:00:00","B26024","1","1","t","해외","대리점","장비","2026-06-11","Asia","x","C1"],["2026","6","1",31000000.0,10850000.0,0.0,"Saigon Medical","베트남","아시아","I","Service Kit","C-50","김서연","D","x","P1","PJT-1","","2026-06-11 09:00:00","B26024","2","1","t","해외","대리점","장비","2026-06-11","Asia","x","C1"],["2026","6","1",13000000.0,2860000.0,0.0,"(주)한빛의료","KR","","I","Circuit Set","B-200","김서연","D","x","P0","PJT-0","","2026-06-06 09:00:00","B26025","1","1","t","국내","대리점","장비","2026-06-06","Asia","x","C1"],["2026","6","1",5000000.0,600000.0,0.0,"(주)한빛의료","KR","","I","Circuit Set","Accessories","김서연","D","x","P1","PJT-1","","2026-06-06 09:00:00","B26025","2","1","t","국내","대리점","장비","2026-06-06","Asia","x","C1"],["2026","6","1",28000000.0,6160000.0,0.0,"(주)한빛의료","KR","","I","Humidifier","B-200","김서연","D","x","P2","PJT-2","","2026-06-06 09:00:00","B26025","3","1","t","국내","대리점","장비","2026-06-06","Asia","x","C1"]]};
+function initDashboard(DATA){
+const F=DATA.fields;
+const rows=DATA.rows.map(a=>Object.fromEntries(F.map((k,i)=>[k,a[i]])));
+const $=id=>document.getElementById(id);
+const n=x=>Number(x)||0;
+const sum=rs=>rs.reduce((a,r)=>a+n(r.amount),0);
+const money=v=>'₩'+Math.round(v).toLocaleString('ko-KR');
+const short=v=>{v=n(v);const sign=v<0?'-':'';v=Math.abs(v);if(v>=1e9)return sign+'₩'+(v/1e9).toFixed(1)+'B';if(v>=1e6)return sign+'₩'+(v/1e6).toFixed(1)+'M';if(v>=1e3)return sign+'₩'+(v/1e3).toFixed(0)+'K';return money(v)};
+const pct=(a,g)=>g?Math.round(a/g*1000)/10:0;
+const esc=x=>String(x??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+const modeOf=r=>String(r.g1||'').trim()==='국내'?'domestic':String(r.g1||'').trim()==='해외'?'overseas':'other';
+const groupOf=r=>{const g1=String(r.g1||'').trim(),g2=String(r.g2||'').trim();if(g1==='국내')return 'domestic';if(g1!=='해외')return 'other';if(g2==='해외법인')return 'corp';if(g2==='SKD'||g2==='OEM/ODM')return 'skd';return 'dealer'};
+const groupLabel={dealer:'대리점',skd:'SKD / OEM / ODM',corp:'해외법인',domestic:'국내',all:'해외통합'};
+const groupColor={dealer:'var(--blue)',skd:'var(--orange)',corp:'var(--purple)',domestic:'var(--green)'};
+const nowYear=new Date().getFullYear();
+const dataYears=[...new Set(rows.map(r=>String(r.year)).filter(x=>/^\d{4}$/.test(x)))].map(Number);
+const minYear=2025;
+const maxYear=Math.max(dataYears.length?Math.max(...dataYears):nowYear,nowYear)+5;
+const years=Array.from({length:maxYear-minYear+1},(_,i)=>String(minYear+i));
+const rawGoals=JSON.parse(localStorage.getItem('phydemoSalesGoalsV5')||'null');
+let goals=(rawGoals && !Array.isArray(rawGoals))?rawGoals:{};
+if(rawGoals && Object.values(rawGoals).some(v=>typeof v==='number')){
+  const l={...rawGoals};
+  goals={2026:{
+    dealer:n(l.dealer),skd:n(l.skd),corp:n(l.corp),domestic:n(l.domestic),
+    domesticService:n(l.domesticService),overseasService:n(l.overseasService)
+  }};
+  localStorage.setItem('phydemoSalesGoalsV5',JSON.stringify(goals))
+}
+if(!goals['2026']) goals['2026']={
+  dealer:2803220000,skd:2041900000,corp:10845520000,domestic:0,
+  domesticService:375000000,overseasService:800000000
+};
+// 2025년 해외영업 목표 기본값. 이 PC에서 2025 목표를 입력한 적이 없으면(세 칸이 모두 0) 기본값을 쓰고,
+// 직접 입력해 저장한 값이 있으면 그 값을 그대로 쓴다. (편집 가능)
+if(!goals['2025'] || (n(goals['2025'].dealer)+n(goals['2025'].skd)+n(goals['2025'].corp))===0){
+  goals['2025']=Object.assign({domestic:0,domesticService:375000000,overseasService:800000000},
+    goals['2025']||{},{dealer:3665655000,skd:2706750000,corp:3348000000});
+}
+// 2026년 국내 영업 목표 기본값(63.21억). 이 PC에서 국내 목표를 입력한 적이 없으면(0 또는 비어 있음) 기본값을 쓰고,
+// 직접 입력해 저장한 값이 있으면 그 값을 그대로 쓴다. (편집 가능)
+if(!(n(goals['2026'].domestic)>0)) goals['2026'].domestic=6321000000;
+function yearGoals(){
+  if(!goals[state.year])goals[state.year]={
+    dealer:0,skd:0,corp:0,domestic:0,domesticService:0,overseasService:0
+  };
+  if(goals[state.year].domesticService==null)goals[state.year].domesticService=375000000;
+  if(goals[state.year].overseasService==null)goals[state.year].overseasService=800000000;
+  return goals[state.year]
+}
+const state={year:years.includes(String(nowYear))?String(nowYear):years.at(-1),mode:'overseas',segment:'all',editGoals:false,analyticsAreaKey:null};
+$('yearSelect').innerHTML=years.map(y=>`<option value="${esc(y)}">${esc(y)}년</option>`).join('');$('yearSelect').value=state.year;
+function areaRows(){const yr=rows.filter(r=>String(r.year)===state.year);if(state.mode==='all')return yr.filter(r=>{const m=modeOf(r);return m==='domestic'||m==='overseas'});if(state.mode==='domestic')return yr.filter(r=>modeOf(r)==='domestic');const ov=yr.filter(r=>modeOf(r)==='overseas');return state.segment==='all'?ov:ov.filter(r=>groupOf(r)===state.segment)}
+function groupRows(key){return rows.filter(r=>String(r.year)===state.year&&groupOf(r)===key)}
+function service(rs){return rs.filter(r=>String(r.g3||'').trim()==='서비스')}
+function pure(rs){return sum(rs)-sum(service(rs))}
+function selectedLabel(){return state.mode==='all'?'전체':(state.mode==='domestic'?'국내':(state.segment==='all'?'해외':groupLabel[state.segment]))}
+function renderNav(){
+  document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===state.mode));
+  $('title').textContent=selectedLabel();
+  $('subtitle').textContent=state.mode==='all'?`${state.year}년 국내 + 해외 통합 ERP 매출 기준`:`${state.year}년 ${selectedLabel()} 최신 ERP 매출 기준`;
+  if(state.mode==='overseas'){
+    $('subnav').innerHTML=['all','dealer','skd','corp'].map(k=>`<button data-seg="${k}" class="${state.segment===k?'active':''}">${groupLabel[k]}</button>`).join('');
+    document.querySelectorAll('[data-seg]').forEach(b=>b.onclick=()=>{state.segment=b.dataset.seg;state.analyticsAreaKey=null;renderAll()})
+  } else $('subnav').innerHTML='';
+}
+function selectedGoal(){const g=yearGoals();if(state.mode==='all')return n(g.domestic)+n(g.dealer)+n(g.skd)+n(g.corp);return state.mode==='domestic'?n(g.domestic):(state.segment==='all'?n(g.dealer)+n(g.skd)+n(g.corp):n(g[state.segment]))}
+function goalActual(key){return sum(groupRows(key))}
+function targetKeys(){return state.mode==='domestic'?[['domestic','국내영업']]:[['dealer','대리점'],['skd','SKD / OEM / ODM'],['corp','해외법인']]}
+
+function animateNumber(el, target, formatter, duration=850){
+  if(!el)return;
+  const start=Number(el.dataset.value||0), end=Number(target)||0;
+  const t0=performance.now();
+  function tick(now){
+    const p=Math.min(1,(now-t0)/duration), e=1-Math.pow(1-p,3);
+    el.textContent=formatter(start+(end-start)*e);
+    if(p<1)requestAnimationFrame(tick);else{el.dataset.value=end;el.textContent=formatter(end)}
+  }
+  requestAnimationFrame(tick);
+}
+function drawCanvasLine(id, vals, vals2, vals3){
+  const c=$(id); if(!c)return;
+  const box=c.getBoundingClientRect(), dpr=Math.min(devicePixelRatio||1,2);
+  const w=Math.max(320,box.width),h=Math.max(180,box.height);
+  c.width=w*dpr;c.height=h*dpr;const x=c.getContext('2d');x.scale(dpr,dpr);
+  const all=[...vals,...vals2,...vals3], max=Math.max(...all,1), pad={l:8,r:8,t:12,b:18};
+  const iw=w-pad.l-pad.r, ih=h-pad.t-pad.b;
+  x.clearRect(0,0,w,h);
+  x.strokeStyle='rgba(130,165,195,.10)';x.lineWidth=1;
+  for(let i=0;i<4;i++){const y=pad.t+ih*i/3;x.beginPath();x.moveTo(pad.l,y);x.lineTo(w-pad.r,y);x.stroke()}
+  const pts=(a)=>a.map((v,i)=>({x:pad.l+(i/(a.length-1))*iw,y:pad.t+ih-(v/max)*ih}));
+  const p1=pts(vals),p2=pts(vals2),p3=pts(vals3);
+
+  const grad=x.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,'rgba(74,163,255,.26)');
+  grad.addColorStop(1,'rgba(74,163,255,0)');
+  x.beginPath();
+  p1.forEach((p,i)=>i?x.lineTo(p.x,p.y):x.moveTo(p.x,p.y));
+  x.lineTo(p1.at(-1).x,h);x.lineTo(p1[0].x,h);x.closePath();
+  x.fillStyle=grad;x.fill();
+
+  function line(points,color,width,dash=[]){
+    x.beginPath();
+    points.forEach((p,i)=>i?x.lineTo(p.x,p.y):x.moveTo(p.x,p.y));
+    x.strokeStyle=color;x.lineWidth=width;x.lineJoin='round';x.lineCap='round';
+    x.setLineDash(dash);x.stroke();x.setLineDash([]);
+  }
+  line(p1,'#4aa3ff',2.6);
+  line(p2,'#70e0ff',1.6);
+  line(p3,'#a979ff',2.0);
+
+  p1.forEach((p,i)=>{
+    if(vals[i]>0){
+      x.beginPath();x.arc(p.x,p.y,3.2,0,Math.PI*2);
+      x.fillStyle='#4aa3ff';x.shadowColor='#4aa3ff';x.shadowBlur=12;x.fill();x.shadowBlur=0;
+    }
+  });
+  p3.forEach((p,i)=>{
+    if(vals3[i]>0){
+      x.beginPath();x.arc(p.x,p.y,2.7,0,Math.PI*2);
+      x.fillStyle='#a979ff';x.shadowColor='#a979ff';x.shadowBlur=10;x.fill();x.shadowBlur=0;
+    }
+  });
+}
+function drawExecSpark(vals){
+  const c=$('execSpark');if(!c)return;
+  const box=c.getBoundingClientRect();
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const w=Math.max(420,Math.floor(box.width||600)), h=Math.max(78,Math.floor(box.height||100));
+  c.width=w*dpr;c.height=h*dpr;
+  const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+  const pad={l:4,r:4,t:10,b:18}, iw=w-pad.l-pad.r, ih=h-pad.t-pad.b;
+  const clean=vals.map(v=>Number(v)||0), max=Math.max(...clean,1);
+  x.clearRect(0,0,w,h);
+
+  // Grid
+  x.lineWidth=1;
+  for(let i=0;i<3;i++){
+    const y=pad.t+(ih*i/2);
+    x.strokeStyle='rgba(130,165,195,.10)';
+    x.beginPath();x.moveTo(pad.l,y);x.lineTo(w-pad.r,y);x.stroke();
+  }
+
+  const pts=clean.map((v,i)=>({
+    x:pad.l+(i/(Math.max(clean.length-1,1)))*iw,
+    y:pad.t+ih-(v/max)*ih
+  }));
+
+  // Area
+  const grad=x.createLinearGradient(0,pad.t,0,h);
+  grad.addColorStop(0,'rgba(74,163,255,.28)');
+  grad.addColorStop(1,'rgba(74,163,255,0)');
+  x.beginPath();
+  pts.forEach((p,i)=>i?x.lineTo(p.x,p.y):x.moveTo(p.x,p.y));
+  x.lineTo(pts.at(-1).x,pad.t+ih);x.lineTo(pts[0].x,pad.t+ih);x.closePath();
+  x.fillStyle=grad;x.fill();
+
+  // Line
+  x.beginPath();
+  pts.forEach((p,i)=>i?x.lineTo(p.x,p.y):x.moveTo(p.x,p.y));
+  x.strokeStyle='#62c9ff';x.lineWidth=2.4;x.lineJoin='round';x.lineCap='round';x.stroke();
+
+  // Points + value labels for non-zero months
+  pts.forEach((p,i)=>{
+    if(clean[i]>0){
+      x.beginPath();x.arc(p.x,p.y,3.1,0,Math.PI*2);
+      x.fillStyle='#62c9ff';x.shadowColor='#62c9ff';x.shadowBlur=10;x.fill();x.shadowBlur=0;
+    }
+  });
+
+  const labels=$('execSparkLabels');
+  if(labels){
+    labels.innerHTML=Array.from({length:12},(_,i)=>`<span>${i+1}</span>`).join('');
+  }
+}
+
+function areaPalette(key){
+  const p={
+    dealer:'#4aa3ff',
+    skd:'#ffb84d',
+    corp:'#a979ff',
+    domestic:'#3fe08a',
+    overseas:'#4aa3ff',
+    domesticService:'#ff6f83',
+    overseasService:'#5ce1e6',
+    service:'#8b7cff',
+    total:'#dbe5ef'
+  };
+  return p[key]||'#70e0ff';
+}
+function areaSeriesForMode(rs){
+  if(state.mode==='all'){
+    return [
+      {key:'domestic',label:'국내',values:Array.from({length:12},(_,m)=>sum(rs.filter(r=>modeOf(r)==='domestic'&&n(r.month)===m+1)))},
+      {key:'overseas',label:'해외',values:Array.from({length:12},(_,m)=>sum(rs.filter(r=>modeOf(r)==='overseas'&&n(r.month)===m+1)))}
+    ];
+  }
+  if(state.mode==='domestic'){
+    return [
+      {key:'domestic',label:'국내',values:Array.from({length:12},(_,m)=>sum(rs.filter(r=>n(r.month)===m+1)))},
+      {key:'domesticService',label:'국내 서비스',values:Array.from({length:12},(_,m)=>sum(service(rs.filter(r=>n(r.month)===m+1))))}
+    ];
+  }
+  if(state.segment==='all'){
+    const overseasRows=rows.filter(r=>String(r.year)===state.year&&modeOf(r)==='overseas');
+    return [
+      {key:'dealer',label:'대리점',values:Array.from({length:12},(_,m)=>sum(groupRowsForMonth('dealer',m+1)))},
+      {key:'skd',label:'SKD / OEM / ODM',values:Array.from({length:12},(_,m)=>sum(groupRowsForMonth('skd',m+1)))},
+      {key:'corp',label:'해외법인',values:Array.from({length:12},(_,m)=>sum(groupRowsForMonth('corp',m+1)))},
+      {key:'overseasService',label:'해외 서비스',values:Array.from({length:12},(_,m)=>sum(service(overseasRows.filter(r=>n(r.month)===m+1))))}
+    ];
+  }
+  const label=groupLabel[state.segment]||'해외';
+  const key=state.segment;
+  return [
+    {key:key,label:label,values:Array.from({length:12},(_,m)=>sum(groupRowsForMonth(key,m+1)))},
+    {key:'overseasService',label:'해외 서비스',values:Array.from({length:12},(_,m)=>sum(service(groupRowsForMonth(key,m+1))))}
+  ];
+}
+function groupRowsForMonth(key,month){
+  return rows.filter(r=>String(r.year)===state.year&&groupOf(r)===key&&n(r.month)===month);
+}
+function areaMonthlyValues(rs){
+  return areaSeriesForMode(rs);
+}
+function drawAreaBars(id,series){
+  const c=$(id);if(!c)return;
+  const box=c.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2),w=Math.max(420,Math.floor(box.width)),h=Math.max(220,Math.floor(box.height));
+  c.width=w*dpr;c.height=h*dpr;
+  const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
+
+  const clean=series.map(s=>({
+    label:s.label,key:s.key,value:s.values.reduce((a,v)=>a+n(v),0),color:areaPalette(s.key)
+  })).filter(s=>s.value>0);
+
+  if(!clean.length){
+    x.fillStyle='rgba(150,165,185,.7)';x.font='12px sans-serif';x.fillText('표시할 데이터가 없습니다.',20,30);
+    c.onclick=null;c.style.cursor='default';return;
+  }
+
+  const max=Math.max(...clean.map(s=>s.value),1);
+  const left=Math.min(170,w*.32),right=90,top=20,bottom=22;
+  const ih=Math.max(80,h-top-bottom),rowH=ih/clean.length;
+  const hitRows=[];
+
+  x.font='11px sans-serif';x.textBaseline='middle';
+
+  clean.forEach((s,i)=>{
+    const y=top+i*rowH+rowH*.15;
+    const barH=Math.min(34,rowH*.58);
+    const width=(s.value/max)*(w-left-right);
+    const selected=state.analyticsAreaKey===s.key;
+    const hasSelection=!!state.analyticsAreaKey;
+    const alpha=hasSelection?(selected?1:.25):1;
+
+    x.globalAlpha=0.55;
+    x.fillStyle='rgba(130,165,195,.10)';
+    x.beginPath();x.roundRect(left,y,w-left-right,barH,6);x.fill();
+    x.globalAlpha=alpha;
+    const g=x.createLinearGradient(left,y,left+Math.max(2,width),y);
+    g.addColorStop(0,s.color);g.addColorStop(1,s.color);
+    x.fillStyle=g;x.beginPath();x.roundRect(left,y,Math.max(2,width),barH,6);x.fill();
+    x.globalAlpha=1;
+
+    x.fillStyle='rgba(225,235,245,.92)';
+    x.textAlign='left';x.fillText(s.label,6,y+barH/2);
+    x.fillStyle='rgba(225,235,245,.9)';
+    x.textAlign='right';x.fillText(short(s.value),w-2,y+barH/2);
+    x.textAlign='left';
+
+    // The whole row is clickable, not just the colored portion.
+    hitRows.push({key:s.key,top:Math.max(0,y-8),bottom:Math.min(h,y+barH+8)});
+  });
+
+  c.style.cursor='pointer';
+  c.onclick=e=>{
+    const r=c.getBoundingClientRect();
+    const py=e.clientY-r.top;
+    const hit=hitRows.find(row=>py>=row.top&&py<=row.bottom);
+    if(!hit)return;
+    e.preventDefault();
+    e.stopPropagation();
+    state.analyticsAreaKey=(state.analyticsAreaKey===hit.key)?null:hit.key;
+    renderExecutiveAreaAnalytics(_execAnalyticsRows);
+  };
+}
+function drawAreaTrend(id,series){
+  const c=$(id);if(!c)return;
+  const box=c.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2),w=Math.max(520,Math.floor(box.width)),h=Math.max(220,Math.floor(box.height));
+  c.width=w*dpr;c.height=h*dpr;const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
+  const max=Math.max(...series.flatMap(s=>s.values),1),pad={l:28,r:18,t:16,b:25},iw=w-pad.l-pad.r,ih=h-pad.t-pad.b;
+  x.strokeStyle='rgba(130,165,195,.10)';x.lineWidth=1;
+  for(let i=0;i<4;i++){const y=pad.t+ih*i/3;x.beginPath();x.moveTo(pad.l,y);x.lineTo(w-pad.r,y);x.stroke();}
+  for(let i=0;i<12;i++){
+    const px=pad.l+(i/11)*iw;
+    x.strokeStyle='rgba(130,165,195,.055)';x.beginPath();x.moveTo(px,pad.t);x.lineTo(px,pad.t+ih);x.stroke();
+    x.fillStyle='rgba(125,145,165,.78)';x.font='8px sans-serif';x.textAlign='center';x.fillText(String(i+1),px,h-7);
+  }
+  x.textAlign='left';
+  series.forEach((s,si)=>{
+    const pts=s.values.map((v,i)=>({x:pad.l+(i/11)*iw,y:pad.t+ih-(v/max)*ih}));
+    const color=areaPalette(s.key);
+    if(si===0){
+      const grad=x.createLinearGradient(0,pad.t,0,h);grad.addColorStop(0,hexToRgba(color,.20));grad.addColorStop(1,hexToRgba(color,0));
+      x.beginPath();pts.forEach((p,i)=>i?x.lineTo(p.x,p.y):x.moveTo(p.x,p.y));x.lineTo(pts.at(-1).x,pad.t+ih);x.lineTo(pts[0].x,pad.t+ih);x.closePath();x.fillStyle=grad;x.fill();
+    }
+    x.beginPath();pts.forEach((p,i)=>i?x.lineTo(p.x,p.y):x.moveTo(p.x,p.y));x.strokeStyle=color;x.lineWidth=si===0?2.8:2.0;x.lineJoin='round';x.lineCap='round';x.setLineDash([]);x.stroke();x.setLineDash([]);
+    pts.forEach((p,i)=>{if(s.values[i]>0){x.beginPath();x.arc(p.x,p.y,2.7,0,Math.PI*2);x.fillStyle=color;x.shadowColor=color;x.shadowBlur=9;x.fill();x.shadowBlur=0;}});
+  });
+}
+function renderAreaLegend(containerId,series){
+  const el=$(containerId);if(!el)return;
+  el.innerHTML=series
+    .filter(s=>s.values.reduce((a,v)=>a+n(v),0)>0)
+    .map(s=>`<span class="exec-area-select ${state.analyticsAreaKey===s.key?'selected':''}" data-area-key="${escHtml(s.key)}" title="${escHtml(s.label)}"><i style="background:${areaPalette(s.key)};color:${areaPalette(s.key)}"></i>${escHtml(s.label)}</span>`)
+    .join('');
+  el.querySelectorAll('.exec-area-select').forEach(item=>{
+    item.onclick=e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      const key=item.dataset.areaKey;
+      state.analyticsAreaKey=(state.analyticsAreaKey===key)?null:key;
+      renderExecutiveAreaAnalytics(_execAnalyticsRows);
+    };
+  });
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest('.exec-area-select')) return;
+  if(!state.analyticsAreaKey) return;
+  // Any other dashboard interaction returns Executive Analytics to comparison mode.
+  state.analyticsAreaKey=null;
+  if(_execAnalyticsRows.length) renderExecutiveAreaAnalytics(_execAnalyticsRows);
+});
+
+let _execAnalyticsRows=[];
+function renderExecutiveAreaAnalytics(rs){
+  _execAnalyticsRows=rs;
+  const allSeries=areaMonthlyValues(rs);
+  const validKeys=new Set(allSeries.map(x=>x.key));
+  if(state.analyticsAreaKey && !validKeys.has(state.analyticsAreaKey)) state.analyticsAreaKey=null;
+  const series=state.analyticsAreaKey?allSeries.filter(x=>x.key===state.analyticsAreaKey):allSeries;
+  drawAreaBars('areaBarCanvas',series);
+  drawAreaTrend('areaTrendCanvas',series);
+  renderAreaLegend('areaBarLegend',allSeries);
+  renderAreaLegend('areaTrendLegend',allSeries);
+
+  const total=sum(rs),svc=sum(service(rs));
+  const prevYear=String(Number(state.year)-1);
+  const prevRows=rows.filter(r=>String(r.year)===prevYear&&(
+    state.mode==='all'
+      ? (modeOf(r)==='domestic'||modeOf(r)==='overseas')
+      : state.mode==='domestic'
+        ? modeOf(r)==='domestic'
+        : modeOf(r)==='overseas'&&(state.segment==='all'||groupOf(r)===state.segment)
+  ));
+  const prevTotal=sum(prevRows);
+  const yoy=prevTotal!==0?((total-prevTotal)/Math.abs(prevTotal))*100:null;
+  if($('execSelectedRevenue'))$('execSelectedRevenue').textContent=money(total);
+  if($('execSelectedRevenueText'))$('execSelectedRevenueText').textContent=`${selectedLabel()} · ${state.year}년`;
+  if($('execYoY'))$('execYoY').textContent=yoy===null?'—':`${yoy>=0?'+':''}${yoy.toFixed(1)}%`;
+  if($('execYoYText'))$('execYoYText').textContent=prevTotal!==0?`${prevYear}년 ${short(prevTotal)}`:`${prevYear}년 데이터 없음`;
+  if($('execServiceShare'))$('execServiceShare').textContent=total?`${(svc/total*100).toFixed(1)}%`:'0.0%';
+  const title=state.mode==='all'?'Domestic vs Overseas Revenue':state.mode==='domestic'?'Domestic Revenue & Service':'Overseas Area Revenue';
+  if($('areaChartTitle'))$('areaChartTitle').textContent=state.mode==='overseas'&&state.segment==='all'?'Overseas Area & Service':title;
+  if($('areaTrendTitle'))$('areaTrendTitle').textContent=state.mode==='overseas'&&state.segment!=='all'?`${selectedLabel()} & Service Trend`:'Monthly Area Trend';
+  if($('areaChartTag'))$('areaChartTag').textContent=state.mode==='all'?'DOMESTIC · OVERSEAS':state.mode==='domestic'?'DOMESTIC · SERVICE':'DEALER · SKD · CORP · SERVICE';
+  if($('areaTrendTag'))$('areaTrendTag').textContent='JAN · DEC';
+  if($('execAnalyticsSubtitle'))$('execAnalyticsSubtitle').textContent=state.mode==='all'?'국내와 해외 매출 규모를 비교하고 월별 흐름을 확인합니다.':state.mode==='domestic'?'국내 매출과 국내 서비스의 월별 흐름을 비교합니다.':'대리점, SKD / OEM / ODM, 해외법인, 해외 서비스의 매출 규모와 월별 흐름을 비교합니다.';
+}
+function renderAdvancedAnalytics(rs){
+  renderExecutiveAreaAnalytics(rs);
+  const by=new Array(12).fill(0);
+  rs.forEach(r=>{const m=n(r.month);if(m>=1&&m<=12)by[m-1]+=n(r.amount)});
+  const max=Math.max(...by,1),heat=$('heatmap');
+  if(heat)heat.innerHTML=by.map((v,i)=>`<div class="heat-cell" title="${i+1}월 · ${money(v)}" style="background:rgba(74,163,255,${v?(.08+.72*v/max):.025});box-shadow:${v?`0 0 ${Math.min(24,5+v/max*19)}px rgba(74,163,255,.12)`:''}"></div>`).join('');
+  const peak=by.indexOf(Math.max(...by));
+  if($('peakMonth'))$('peakMonth').textContent=by[peak]>0?`${peak+1}월 · ${short(by[peak])}`:'-';
+  if($('monthlyAvg'))$('monthlyAvg').textContent=short(sum(by)/12);
+  const prev=String(Number(state.year)-1);
+  const prevRows=rows.filter(r=>String(r.year)===prev&&(
+    state.mode==='all'?(modeOf(r)==='domestic'||modeOf(r)==='overseas'):
+    state.mode==='domestic'?modeOf(r)==='domestic':modeOf(r)==='overseas'&&(state.segment==='all'||groupOf(r)===state.segment)
+  ));
+  const prevAmt=sum(prevRows),cur=sum(rs),growth=prevAmt?((cur-prevAmt)/prevAmt*100):null;
+  if($('yoySignal')){$('yoySignal').textContent=growth===null?'N/A':`${growth>=0?'+':''}${growth.toFixed(1)}% YoY`;$('yoySignal').style.color=growth===null?'':growth>=0?'var(--green)':'var(--red)';}
+}
+
+function renderExecutive(rs){
+  const a=sum(rs),p=pure(rs),g=selectedGoal(),q=g?a/g*100:0,pq=g?p/g*100:0;
+  const execTitle=$('execTitle'), execSub=$('execSub'), execAchievement=$('execAchievement');
+  const gaugePct=$('gaugePct'), gaugeLabel=$('gaugeLabel'), execGauge=$('execGauge'), pureGaugePct=$('pureGaugePct');
+  if(!execTitle||!execSub||!execAchievement||!gaugePct||!gaugeLabel||!execGauge)return;
+  execTitle.textContent=`${state.year} ${selectedLabel()} Performance`;
+  execSub.textContent=state.mode==='all'
+    ? `ERP 기준 ${rs.length.toLocaleString('ko-KR')}건의 국내 + 해외 매출을 통합하여 회사 전체 실적을 시각화합니다.`
+    : `ERP 기준 ${rs.length.toLocaleString('ko-KR')}건을 분석하여 매출 규모, 순수 매출, 목표 달성률을 실시간으로 시각화합니다.`;
+  animateNumber($('execTotal'),a,v=>money(v),900);
+  animateNumber($('execPure'),p,v=>money(v),1000);
+  execAchievement.textContent=g?`${Math.min(999,q).toFixed(1)}%`:'—';
+  gaugePct.textContent=g?`${Math.min(999,q).toFixed(1)}%`:'—';
+  gaugeLabel.textContent=g?`${money(a)} / ${money(g)}`:'목표 미설정';
+  if(pureGaugePct) pureGaugePct.textContent=g?`${Math.min(999,pq).toFixed(1)}%`:'—';
+  const monthlyRevenue=new Array(12).fill(0);
+  rs.forEach(r=>{const m=n(r.month);if(m>=1&&m<=12)monthlyRevenue[m-1]+=n(r.amount)});
+  drawExecSpark(monthlyRevenue);
+  const pct=Math.max(0,Math.min(100,q));
+  execGauge.style.background=`conic-gradient(from -90deg,#4aa3ff 0deg,#70e0ff ${pct*3.6}deg,rgba(255,255,255,.055) ${pct*3.6}deg 360deg)`;
+}
+
+function renderKPIs(rs){
+  const a=sum(rs),s=sum(service(rs)),p=a-s,g=selectedGoal(),q=pct(a,g);
+  const set=(id,val)=>{const el=$(id);if(el)el.textContent=val};
+  const setPrev=(id,val)=>{const el=$(id);if(el&&el.previousElementSibling)el.previousElementSibling.textContent=val};
+  setPrev('total',state.mode==='all'?'전체 총매출':'총매출');
+  setPrev('service',state.mode==='all'?'전체 서비스 매출':'서비스 매출');
+  setPrev('pure',state.mode==='all'?'전체 순수 매출':'순수 매출');
+  setPrev('goal',state.mode==='all'?'전체 목표':'목표');
+  setPrev('pct',state.mode==='all'?'전체 달성률':'총매출 달성률');
+  set('total',money(a));
+  set('service',money(s));
+  set('pure',money(p));
+  set('goal',money(g));
+  set('pct',g?`${q}%`:'—');
+  set('serviceRate',a?`전체의 ${(s/a*100).toFixed(1)}%`:'전체의 0.0%');
+  set('rowCount',rs.length.toLocaleString('ko-KR')+'건');
+  set('heroTotal',money(a));
+  set('heroPure','순수 매출 '+money(p));
+  set('heroService','서비스 '+money(s));
+  set('heroPct',g?`${q}%`:'—');
+  const bar=$('heroBar');if(bar)bar.style.width=Math.min(100,Math.max(0,q))+'%';
+  set('heroGoalText','목표 '+money(g));
+  set('heroGapText',(g-a>=0?'잔여 ':'초과 ')+money(Math.abs(g-a)));
+}
+function escHtml(v){return esc(String(v??''))}
+function donutGradient(parts){
+  const total=parts.reduce((a,x)=>a+x.value,0)||1;
+  let cur=0;
+  return 'conic-gradient('+parts.map(x=>{
+    const start=cur/total*100; cur+=x.value;
+    const end=cur/total*100;
+    return `${x.color} ${start}% ${end}%`;
+  }).join(',')+')';
+}
+
+
+function hexToRgba(hex,a){
+  const h=String(hex).replace('#','');
+  const v=h.length===3?h.split('').map(x=>x+x).join(''):h;
+  const r=parseInt(v.slice(0,2),16),g=parseInt(v.slice(2,4),16),b=parseInt(v.slice(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function resetDonutSelections(){
+  document.querySelectorAll('.donut').forEach(el=>{
+    el.classList.remove('selected');
+    if(el.dataset.baseGradient) el.style.background=el.dataset.baseGradient;
+    const pct=el.querySelector('.donut-center b');
+    const label=el.querySelector('.donut-center span');
+    if(pct)pct.textContent='100%';
+    if(label)label.textContent=el.dataset.totalLabel||'전체';
+  });
+  document.querySelectorAll('.legend-item.clickable').forEach(x=>{
+    x.classList.remove('active','selected');
+  });
+  const mixPct=$('mixPct'); if(mixPct)mixPct.textContent='100%';
+  const segPct=$('segmentPct'); if(segPct)segPct.textContent='100%';
+}
+
+/* Donut chart is intentionally display-only.
+   Selection is available only through the legend items. */
+function renderInteractiveDonut(id,parts,pctEl,labelEl,totalLabel='전체'){
+  const el=$(id); if(!el)return;
+  const valid=parts.filter(x=>n(x.value)>0);
+  const total=valid.reduce((a,x)=>a+n(x.value),0);
+
+  el.innerHTML='';
+  el.dataset.totalLabel=totalLabel;
+  el.style.pointerEvents='none';
+
+  if(!total){
+    el.style.background='conic-gradient(rgba(130,165,195,.10) 0 100%)';
+    el.innerHTML='<div class="donut-center"><b>0%</b><span>데이터 없음</span></div>';
+    return;
+  }
+
+  let cursor=0;
+  const segments=valid.map((part,i)=>{
+    const pct=n(part.value)/total*100;
+    const seg={...part,value:n(part.value),pct,start:cursor,end:cursor+pct,index:i};
+    cursor+=pct;
+    return seg;
+  });
+
+  const gradient='conic-gradient(from -90deg,'+
+    segments.map(x=>`${x.color} ${x.start}% ${x.end}%`).join(',')+')';
+  el.style.background=gradient;
+  el.dataset.baseGradient=gradient;
+
+  const center=document.createElement('div');
+  center.className='donut-center';
+  center.innerHTML=`<b id="${id}_pct">100%</b><span id="${id}_label">${esc(totalLabel)}</span>`;
+  el.appendChild(center);
+
+  const hint=document.createElement('div');
+  hint.className='donut-hint';
+  hint.textContent='항목은 오른쪽 목록에서 선택';
+  el.appendChild(hint);
+
+  function selectSegment(seg){
+    el.classList.add('selected');
+
+    const dimmed=segments.map(x=>{
+      const alpha=x.index===seg.index?1:.20;
+      return `${hexToRgba(x.color,alpha)} ${x.start}% ${x.end}%`;
+    }).join(',');
+    el.style.background='conic-gradient(from -90deg,'+dimmed+')';
+
+    const centerPct=$(id+'_pct');
+    const centerLabel=$(id+'_label');
+    if(centerPct)centerPct.textContent=`${seg.pct.toFixed(1)}%`;
+    if(centerLabel)centerLabel.textContent=seg.label;
+    if(pctEl)pctEl.textContent=`${seg.pct.toFixed(1)}%`;
+    if(labelEl)labelEl.textContent=seg.label;
+
+    const legendRoot=id==='mixDonut'?$('mixLegend'):$('segmentLegend');
+    if(legendRoot){
+      legendRoot.querySelectorAll('.legend-item.clickable').forEach(item=>{
+        const active=item.dataset.index===String(seg.index);
+        item.classList.toggle('active',active);
+        item.classList.toggle('selected',active);
+      });
+    }
+  }
+
+  el.__selectDonutIndex=i=>{
+    const seg=segments[i];
+    if(seg)selectSegment(seg);
+  };
+
+  if(pctEl)pctEl.textContent='100%';
+  if(labelEl)labelEl.textContent=totalLabel;
+}
+
+/* Clicking outside a legend selection resets the donut to the total view. */
+document.addEventListener('click',e=>{
+  if(e.target.closest('.legend-item.clickable')) return;
+  resetDonutSelections();
+});
+
+function renderVisuals(rs){
+  const total=sum(rs), svc=sum(service(rs)), pureAmt=Math.max(0,total-svc);
+
+  const mixParts=[
+    {label:'순수 매출',value:pureAmt,color:'#3b9cff'},
+    {label:'서비스',value:svc,color:'#a979ff'}
+  ];
+  renderInteractiveDonut('mixDonut',mixParts,$('mixPct'),null,'전체 매출');
+
+  $('mixLegend').innerHTML=mixParts.map((x,i)=>{
+    const p=total?x.value/total*100:0;
+    return `<div class="legend-item clickable" data-donut="mix" data-index="${i}"><i class="legend-dot" style="color:${x.color};background:${x.color}"></i><span>${x.label}</span><b>${short(x.value)} <small style="color:var(--muted);font-weight:500">(${p.toFixed(1)}%)</small></b></div>`;
+  }).join('');
+
+  let segmentParts;
+  if(state.mode==='all'){
+    const domestic=sum(rs.filter(r=>modeOf(r)==='domestic'));
+    const overseas=sum(rs.filter(r=>modeOf(r)==='overseas'));
+    segmentParts=[
+      {label:'국내',value:domestic,color:'#3fe08a'},
+      {label:'해외',value:overseas,color:'#3b9cff'}
+    ].filter(x=>x.value>0);
+  }else if(state.mode==='domestic'){
+    segmentParts=[{label:'국내',value:total,color:'#3fe08a'}];
+  }else{
+    segmentParts=[
+      {label:'대리점',value:sum(groupRows('dealer')),color:'#3b9cff'},
+      {label:'SKD / OEM / ODM',value:sum(groupRows('skd')),color:'#3fe08a'},
+      {label:'해외법인',value:sum(groupRows('corp')),color:'#ffb84d'}
+    ].filter(x=>x.value>0);
+  }
+
+  renderInteractiveDonut('segmentDonut',segmentParts,$('segmentPct'),$('segmentCenterLabel'),
+    state.mode==='all'?'국내 + 해외':(state.mode==='domestic'?'국내':'해외'));
+
+  $('segmentChartTitle').textContent=state.mode==='all'?'국내 / 해외 매출 구성':(state.mode==='domestic'?'국내 매출 구성':'해외영업 구성');
+  $('segmentLegend').innerHTML=segmentParts.length?segmentParts.map((x,i)=>{
+    const p=total?x.value/total*100:0;
+    return `<div class="legend-item clickable" data-donut="segment" data-index="${i}"><i class="legend-dot" style="color:${x.color};background:${x.color}"></i><span>${escHtml(x.label)}</span><b>${short(x.value)} <small style="color:var(--muted);font-weight:500">(${p.toFixed(1)}%)</small></b></div>`;
+  }).join(''):'<div class="empty">데이터 없음</div>';
+
+  document.querySelectorAll('.legend-item.clickable').forEach(item=>{
+    item.addEventListener('click',e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      const donutId=item.dataset.donut==='mix'?'mixDonut':'segmentDonut';
+      const idx=Number(item.dataset.index);
+      const donut=$(donutId);
+      if(donut && donut.__selectDonutIndex) donut.__selectDonutIndex(idx);
+    });
+  });
+}
+
+
+function serviceGoalValue(mode){
+  return n(yearGoals()[mode==='domestic'?'domesticService':'overseasService']);
+}
+function serviceMetrics(mode){
+  const isDomestic=mode==='domestic';
+  const rs=rows.filter(r=>String(r.year)===state.year&&modeOf(r)===(isDomestic?'domestic':'overseas'));
+  const actual=sum(service(rs));
+  const total=sum(rs);
+  return {actual,total,goal:serviceGoalValue(mode),rate:total?actual/total*100:0};
+}
+function targetButtonHtml(){
+  return `<div class="target-input"><button class="goal-action-btn" data-edit-goals="1" style="width:100%">목표 설정</button></div>`;
+}
+function targetInputHtml(key,value){
+  return `<div class="target-input"><input class="goal-edit-input" id="goal_${key}" type="number" min="0" step="1000000" value="${value||''}" placeholder="목표 금액"></div>`;
+}
+function serviceTargetCardHtml(mode){
+  const d=serviceMetrics(mode);
+  const label=mode==='domestic'?'국내 서비스':'해외 서비스';
+  const color=mode==='domestic'?'#ff6f83':'#a979ff';
+  const prefix=mode==='domestic'?'domestic':'overseas';
+  const editing=state.editGoals;
+  const goal=d.goal, q=goal?pct(d.actual,goal):0;
+  return `<div class="target service-target ${prefix}-service-goal-card">
+    <div class="target-head">
+      <div><h4>${label}</h4><div class="target-meta">${state.year}년 · 서비스 매출 목표</div></div>
+      <div class="t-pct service-target-pct" style="color:${color}">${goal?q+'%':'—'}</div>
+    </div>
+    <div class="big-progress service-target-progress"><i style="width:${Math.min(100,Math.max(0,q))}%;background:${color}"></i></div>
+    <div class="target-stats">
+      <div class="target-stat"><span>서비스 매출</span><b>${money(d.actual)}</b></div>
+      <div class="target-stat"><span>서비스 목표</span><b>${goal?money(goal):'미설정'}</b></div>
+      <div class="target-stat"><span>서비스 비중</span><b>${d.rate.toFixed(1)}%</b></div>
+    </div>
+    ${editing?targetInputHtml(mode==='domestic'?'domesticService':'overseasService',goal):targetButtonHtml()}
+  </div>`;
+}
+function revenueTargetCardHtml(key,label,rs,color){
+  const editing=state.editGoals, g=n(yearGoals()[key]), a=sum(rs), sv=sum(service(rs)), p=a-sv, q=g?pct(a,g):0;
+  return `<div class="target" data-key="${key}">
+    <div class="target-head">
+      <div><h4>${label}</h4><div class="target-meta">${state.year}년 · 실적 기준</div></div>
+      <div class="t-pct" style="color:${color}">${g?q+'%':'—'}</div>
+    </div>
+    <div class="big-progress"><i style="width:${Math.min(100,Math.max(0,q))}%;background:${color}"></i></div>
+    <div class="target-stats">
+      <div class="target-stat"><span>총매출</span><b>${money(a)}</b></div>
+      <div class="target-stat"><span>서비스</span><b>${money(sv)}</b></div>
+      <div class="target-stat"><span>순수 매출</span><b>${money(p)}</b></div>
+    </div>
+    ${editing?targetInputHtml(key,g):targetButtonHtml()}
+  </div>`;
+}
+function renderGoalEditActions(){
+  if(!state.editGoals)return;
+  $('targets').insertAdjacentHTML('beforeend',`
+    <div class="goal-edit-actions">
+      <div><strong>목표 일괄 설정</strong><span>모든 목표를 한 번에 수정할 수 있습니다.</span></div>
+      <div class="goal-edit-actions-right">
+        <button id="cancelGoals">취소</button>
+        <button id="saveGoals">변경사항 저장</button>
+      </div>
+    </div>`);
+  $('saveGoals').onclick=()=>{
+    const g=yearGoals();
+    ['dealer','skd','corp','domestic','domesticService','overseasService'].forEach(k=>{
+      const input=$('goal_'+k);
+      if(input)g[k]=Math.max(0,n(input.value));
+    });
+    goals[state.year]=g;
+    localStorage.setItem('phydemoSalesGoalsV5',JSON.stringify(goals));
+    state.editGoals=false;
+    renderAll();
+  };
+  $('cancelGoals').onclick=()=>{state.editGoals=false;renderAll()};
+}
+function bindGoalButtons(){
+  document.querySelectorAll('[data-edit-goals]').forEach(btn=>{
+    btn.onclick=()=>{state.editGoals=true;renderAll()};
+  });
+}
+
+function renderTargets(){
+  const gy=yearGoals();
+
+  if(state.mode==='overseas'){
+    const specs=[
+      ['dealer','대리점',groupRows('dealer'),'var(--blue)'],
+      ['skd','SKD / OEM / ODM',groupRows('skd'),'var(--orange)'],
+      ['corp','해외법인',groupRows('corp'),'var(--purple)']
+    ];
+    $('targets').className='target-grid target-grid-overseas';
+    $('targetHint').textContent=`${state.year}년 해외영업 목표`;
+    $('targets').innerHTML=specs.map(x=>revenueTargetCardHtml(...x)).join('')+serviceTargetCardHtml('overseas');
+    renderGoalEditActions();
+    bindGoalButtons();
+    return;
+  }
+
+  if(state.mode==='domestic'){
+    $('targets').className='target-grid target-grid-domestic';
+    $('targetHint').textContent=`${state.year}년 국내영업 목표`;
+    $('targets').innerHTML=
+      revenueTargetCardHtml('domestic','국내',groupRows('domestic'),'var(--green)')+
+      serviceTargetCardHtml('domestic');
+    renderGoalEditActions();
+    bindGoalButtons();
+    return;
+  }
+
+  // Overall view: six KPI target cards. Overall revenue/service are derived
+  // from the underlying domestic + overseas targets, while all editable
+  // components are shown together in one edit session.
+  const domesticRows=groupRows('domestic');
+  const overseasRows=rows.filter(r=>String(r.year)===state.year&&modeOf(r)==='overseas');
+  const domesticActual=sum(domesticRows), overseasActual=sum(overseasRows), totalActual=domesticActual+overseasActual;
+  const domesticGoal=n(gy.domestic), overseasGoal=n(gy.dealer)+n(gy.skd)+n(gy.corp), totalGoal=domesticGoal+overseasGoal;
+  const domesticSvc=serviceMetrics('domestic'), overseasSvc=serviceMetrics('overseas');
+  const totalSvcActual=domesticSvc.actual+overseasSvc.actual, totalSvcGoal=domesticSvc.goal+overseasSvc.goal;
+  const totalSvcRate=totalActual?totalSvcActual/totalActual*100:0;
+
+  const derivedCard=(key,label,a,g,color,rs,sub)=>{
+    const sv=sum(service(rs)),p=a-sv,q=g?pct(a,g):0;
+    return `<div class="target derived-target">
+      <div class="target-head"><div><h4>${label}</h4><div class="target-meta">${state.year}년 · ${sub}</div></div><div class="t-pct" style="color:${color}">${g?q+'%':'—'}</div></div>
+      <div class="big-progress"><i style="width:${Math.min(100,Math.max(0,q))}%;background:${color}"></i></div>
+      <div class="target-stats"><div class="target-stat"><span>총매출</span><b>${money(a)}</b></div><div class="target-stat"><span>서비스</span><b>${money(sv)}</b></div><div class="target-stat"><span>순수 매출</span><b>${money(p)}</b></div></div>
+      <div class="target-meta goal-derived-note">구성 목표의 합계로 자동 계산</div>
+    </div>`;
+  };
+  const derivedService=(label,actual,g,color,sub)=>{
+    const q=g?pct(actual,g):0;
+    return `<div class="target service-target derived-target">
+      <div class="target-head"><div><h4>${label}</h4><div class="target-meta">${state.year}년 · ${sub}</div></div><div class="t-pct" style="color:${color}">${g?q+'%':'—'}</div></div>
+      <div class="big-progress service-target-progress"><i style="width:${Math.min(100,Math.max(0,q))}%;background:${color}"></i></div>
+      <div class="target-stats"><div class="target-stat"><span>서비스 매출</span><b>${money(actual)}</b></div><div class="target-stat"><span>서비스 목표</span><b>${g?money(g):'미설정'}</b></div><div class="target-stat"><span>서비스 비중</span><b>${totalActual?((actual/totalActual)*100).toFixed(1)+'%':'0.0%'}</b></div></div>
+      <div class="target-meta goal-derived-note">국내 + 해외 서비스 목표의 합계로 자동 계산</div>
+    </div>`;
+  };
+
+  $('targets').className='target-grid target-grid-overall';
+  $('targetHint').textContent=`${state.year}년 전체 목표 · 국내 + 해외 통합`;
+  $('targets').innerHTML=
+    derivedCard('domestic','국내',domesticActual,domesticGoal,'var(--green)',domesticRows,'국내 목표')+
+    derivedCard('overseas','해외',overseasActual,overseasGoal,'var(--blue)',overseasRows,'대리점 + SKD + 해외법인 목표')+
+    derivedCard('total','전체',totalActual,totalGoal,'#dbe5ef',areaRows(),'국내 + 해외 통합')+
+    derivedService('국내 서비스',domesticSvc.actual,domesticSvc.goal,'#ff6f83','국내 서비스 목표')+
+    derivedService('해외 서비스',overseasSvc.actual,overseasSvc.goal,'#5ce1e6','해외 서비스 목표')+
+    derivedService('전체 서비스',totalSvcActual,totalSvcGoal,'#8b7cff','국내 + 해외 서비스 통합');
+
+  if(state.editGoals){
+    // Add a compact global editor under the derived overview cards.
+    $('targets').insertAdjacentHTML('beforeend',`
+      <div class="goal-global-editor">
+        <div class="goal-global-head"><strong>전체 목표 일괄 설정</strong><span>개별 구성 목표를 수정하면 전체 / 해외 목표가 자동으로 재계산됩니다.</span></div>
+        <div class="goal-global-grid">
+          <label>국내 매출 목표${targetInputHtml('domestic',domesticGoal).replace(/<div class="target-input">|<\/div>/g,'')}</label>
+          <label>대리점 목표${targetInputHtml('dealer',n(gy.dealer)).replace(/<div class="target-input">|<\/div>/g,'')}</label>
+          <label>SKD / OEM / ODM 목표${targetInputHtml('skd',n(gy.skd)).replace(/<div class="target-input">|<\/div>/g,'')}</label>
+          <label>해외법인 목표${targetInputHtml('corp',n(gy.corp)).replace(/<div class="target-input">|<\/div>/g,'')}</label>
+          <label>국내 서비스 목표${targetInputHtml('domesticService',domesticSvc.goal).replace(/<div class="target-input">|<\/div>/g,'')}</label>
+          <label>해외 서비스 목표${targetInputHtml('overseasService',overseasSvc.goal).replace(/<div class="target-input">|<\/div>/g,'')}</label>
+        </div>
+      </div>`);
+  }
+  renderGoalEditActions();
+  bindGoalButtons();
+}
+
+function renderMonths(rs){const by=new Array(12).fill(0);rs.forEach(r=>{const m=n(r.month);if(m>=1&&m<=12)by[m-1]+=n(r.amount)});const mx=Math.max(...by,1);$('months').innerHTML=by.map((v,i)=>`<div class="month-row"><span class="m">${i+1}월</span><span class="month-bar"><i style="width:${v?Math.max(2,v/mx*100):0}%"></i></span><span class="amt">${short(v)}</span></div>`).join('')}
+function renderQuarter(rs){const vals=[1,2,3,4].map(q=>sum(rs.filter(r=>String(r.quarter)===String(q))));$('quarters').innerHTML='<thead><tr><th>분기</th>'+[1,2,3,4].map(q=>`<th>Q${q}</th>`).join('')+'<th>합계</th></tr></thead><tbody><tr><td>'+esc(selectedLabel())+'</td>'+vals.map(v=>`<td>${short(v)}</td>`).join('')+'<td>'+short(vals.reduce((a,v)=>a+v,0))+'</td></tr></tbody>';$('trendHint').textContent=`${selectedLabel()} · ${state.year}`}
+function rank(rs,key,limit=8){const m=new Map();rs.forEach(r=>{const k=String(r[key]||'').trim();if(!k||k==='nan')return;if(key==='owner'&&n(r.amount)<=0)return;m.set(k,(m.get(k)||0)+n(r.amount))});const arr=[...m.entries()].filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,limit),mx=arr[0]?.[1]||1;return arr.length?arr.map(([k,v],i)=>`<div class="rank-row"><span class="idx">${i+1}</span><div><div class="name" title="${esc(k)}">${esc(k)}</div><div class="rank-line"><i style="width:${(v/mx*100).toFixed(1)}%"></i></div></div><span class="rank-val">${short(v)}</span></div>`).join(''):'<div class="empty">데이터 없음</div>'}
+function renderRanks(rs){
+  $('customer').innerHTML=rank(rs,'customer');
+  $('product').innerHTML=rank(rs,'itemName');
+  $('country').innerHTML=rank(rs,'country');
+  if(state.mode==='all'){
+    $('region').innerHTML=rank(rs.map(r=>({...r,areaLabel:modeOf(r)==='domestic'?'국내':'해외'})),'areaLabel');
+    $('regionTitle').textContent='국내 / 해외';
+  }else{
+    $('region').innerHTML=rank(rs,state.mode==='overseas'?'continent':'region');
+    $('regionTitle').textContent=state.mode==='overseas'?'지역 / 대륙':'지역';
+  }
+  $('owner').innerHTML=rank(rs,'owner')
+}
+function renderFunnel(rs){const fr=rs.filter(r=>String(r.funnelNo||'').trim()&&String(r.funnelNo)!=='nan');$('funnelAmount').textContent=money(sum(fr));$('funnelCount').textContent=`${new Set(fr.map(r=>r.funnelNo)).size.toLocaleString('ko-KR')}개`;}
+function overrideOwner(r){
+  const y=Number(r.year)||0;
+  const g1=String(r.g1||'').trim();
+  const g3=String(r.g3||'').trim();
+  const original=String(r.owner||'').trim();
+  // 2026년부터 해외 서비스 매출은 2026-10-08까지 김서연, 2026-10-09부터 이도현 매출로 집계합니다.
+  if(y>=2026 && g1==='해외' && g3==='서비스') return String(r.saleDate||'').trim()>='2026-10-09'?'이도현':'김서연';
+  // 동일 연도의 기존 ERP 담당자값이 김서연인 비서비스 매출은 담당자 집계에서 제외합니다.
+  // 따라서 2026년 해외 화면의 김서연 매출은 2026-10-08까지의 해외 서비스 매출과 일치합니다.
+  if(y>=2026 && original==='김서연') return '';
+  return original;
+}
+let lastOwnerRows=[];
+function loadOwnerCorp(){try{return localStorage.getItem('phydemoOwnerCorpV1')==='include'?'include':'exclude'}catch(e){return 'exclude'}}
+function saveOwnerCorp(v){try{localStorage.setItem('phydemoOwnerCorpV1',v)}catch(e){}}
+function isCorpRow(r){return String(r.g2||'').trim()==='해외법인' && String(r.g3||'').trim()!=='서비스'}
+function renderOwnerWithOverride(rs){
+  // 담당자 순위에서 해외법인(구분2) 매출을 어떻게 볼지 고릅니다. (서비스 매출은 위의 담당자 규칙을 그대로 따릅니다.)
+  //  - 해외법인 제외(기본): 자사 법인 간 내부 출고이므로 사람 순위에서 빼고, 순위 아래에 별도 줄로 보여줍니다.
+  //  - 해외법인 포함: ERP 기록 그대로 담당자별로 합산합니다.
+  // 선택은 이 PC의 브라우저에 기억합니다. 해외법인 구분이 없는 연도·영역에서는 선택할 수 없습니다.
+  lastOwnerRows=rs;
+  if(!state.ownerCorp) state.ownerCorp=loadOwnerCorp();
+  const hasCorp=rs.some(r=>isCorpRow(r)&&overrideOwner(r));
+  const exclude=hasCorp&&state.ownerCorp==='exclude';
+  const tg=$('ownerToggle');
+  if(tg){
+    tg.classList.toggle('off',!hasCorp);
+    tg.title=hasCorp?'':'이 연도·영역의 데이터에는 해외법인 구분이 없어 선택할 수 없습니다.';
+    tg.querySelectorAll('button').forEach(b=>{
+      b.classList.toggle('active',hasCorp&&b.dataset.corp===state.ownerCorp);
+      b.onclick=()=>{state.ownerCorp=b.dataset.corp;saveOwnerCorp(state.ownerCorp);renderOwnerWithOverride(lastOwnerRows)};
+    });
+  }
+  const people=[];let corp=0;
+  rs.forEach(r=>{
+    const o=overrideOwner(r);
+    if(!o) return;                                   // 기존처럼 담당자 집계에서 제외되는 매출
+    if(exclude&&isCorpRow(r)){ if(n(r.amount)>0) corp+=n(r.amount); }
+    else people.push({...r,owner:o});
+  });
+  let html=rank(people,'owner');
+  if(exclude&&corp>0) html+=`<div class="rank-sep" title="자사 해외법인(구분2)으로 나간 서비스 외 매출입니다. '해외법인 포함'을 누르면 담당자 순위에 합산해 볼 수 있습니다."><span>해외법인 매출 (순위 제외)</span><b>${short(corp)}</b></div>`;
+  $('owner').innerHTML=html;
+  bindOwnerClicks(exclude);
+}
+function csvCell(v){const s=String(v??'');return /[",\n]/.test(s)?'"'+s.replaceAll('"','""')+'"':s}
+function exportCsv(){const rs=areaRows().map(r=>({...r,owner:overrideOwner(r)}));const lines=[F.join(',')];for(const r of rs) lines.push(F.map(k=>csvCell(r[k])).join(','));const blob=new Blob(["\uFEFF"+lines.join('\n')],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`근거데이터_${state.year}_${selectedLabel()}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
+const LATEST_UPDATE = rows.map(r=>String(r.updated||'').trim()).filter(Boolean).sort().pop() || '-';
+function renderStale(){
+  const box=$('staleBanner'), upd=$('updated'); if(!box) return;
+  const d=new Date(String(LATEST_UPDATE).replace(' ','T'));
+  const days=isNaN(d.getTime())?null:Math.floor((Date.now()-d.getTime())/864e5);
+  if(days!==null && days>=3){
+    box.style.display='block';
+    box.textContent=`ERP 데이터가 ${days}일 전(${String(LATEST_UPDATE).slice(0,16)}) 기준입니다. 업데이트가 멈췄을 수 있어 지금 숫자와 다를 수 있습니다. (연휴 기간이면 정상일 수 있습니다)`;
+    if(upd) upd.style.color='var(--red)';
+  }else{
+    box.style.display='none';
+    if(upd) upd.style.color='';
+  }
+}
+
+function syncSelectionUI(){
+  document.querySelectorAll('.subnav button').forEach(btn=>{
+    const label=String(btn.textContent||'').trim();
+    btn.classList.toggle('active',
+      state.mode==='overseas' && (
+        (state.segment==='all' && label==='해외통합') ||
+        (state.segment==='dealer' && label==='대리점') ||
+        (state.segment==='skd' && label==='SKD / OEM / ODM') ||
+        (state.segment==='corp' && label==='해외법인')
+      )
+    );
+  });
+  document.querySelectorAll('.mode button').forEach(btn=>{
+    btn.classList.toggle('active',String(btn.dataset.mode||'')===state.mode);
+  });
+}
+
+function normalizeTopModeLabels(){
+  const mode=document.querySelector('.header-actions .mode');
+  if(!mode)return;
+  mode.querySelectorAll('button[data-mode]').forEach(btn=>{
+    const labels={overseas:'해외',domestic:'국내',all:'전체'};
+    btn.textContent=labels[btn.dataset.mode]||btn.dataset.mode;
+    btn.classList.toggle('active',btn.dataset.mode===state.mode);
+  });
+}
+
+function billGroups(rs){
+  // 같은 매출 전표(BILL_NUM)의 품목 줄은 한 건으로 합친다. 전표번호가 비어 있는 줄은 각각 한 건으로 본다.
+  const dateOf=r=>String(r.saleDate||'').trim().replace(/[./]/g,'-').slice(0,10);
+  const m=new Map();
+  rs.forEach((r,i)=>{
+    const bn=String(r.billNum||'').trim();
+    const key=bn&&bn!=='nan'?'B'+bn:'R'+i;
+    let b=m.get(key);
+    if(!b){b={date:'',updated:'',bill:bn,customer:'',amount:0,profit:0,hasProfit:false,items:[],lines:[],g1:'',service:false,top:-Infinity};m.set(key,b)}
+    const d=dateOf(r);if(d>b.date)b.date=d;
+    const u=String(r.updated||'').trim();if(u>b.updated)b.updated=u;
+    const a=n(r.amount);b.amount+=a;
+    b.profit+=n(r.profit);if(n(r.profit)!==0)b.hasProfit=true;
+    const nm=String(r.itemName||'').trim();
+    if(nm&&nm!=='nan')b.items.push([nm,a]);
+    b.lines.push(r);
+    if(a>b.top){b.top=a;b.customer=String(r.customer||'').trim();b.g1=String(r.g1||'').trim()}
+    if(String(r.g3||'').trim()==='서비스')b.service=true;
+  });
+  return [...m.values()];
+}
+function recentSales(rs,limit=10){
+  return billGroups(rs).sort((x,y)=>(y.date>x.date)-(y.date<x.date)||(y.updated>x.updated)-(y.updated<x.updated)||String(y.bill).localeCompare(String(x.bill))).slice(0,limit);
+}
+function bigDeals(rs,limit=5){
+  return billGroups(rs).filter(b=>b.amount>0).sort((x,y)=>y.amount-x.amount||(y.date>x.date)-(y.date<x.date)).slice(0,limit);
+}
+function recentDetailHtml(b){
+  const ls=b.lines.slice().sort((p,q)=>(Number(p.billSeq)||0)-(Number(q.billSeq)||0));
+  const clean=v=>{v=String(v??'').trim();return v==='nan'?'':v};
+  return `<table class="rc-sub"><thead><tr><th>전표번호</th><th>순번</th><th>품목</th><th>모델</th><th>프로젝트</th><th class="r">금액</th></tr></thead><tbody>`+
+    ls.map(r=>`<tr><td>${esc(clean(r.billNum)||'-')}</td><td>${esc(clean(r.billSeq)||'-')}</td><td>${esc(clean(r.itemName)||'-')}</td><td>${esc(clean(r.model)||'-')}</td><td>${esc(clean(r.projectName)||clean(r.projectNo)||'-')}</td><td class="r${n(r.amount)<0?' neg':''}">${money(n(r.amount))}</td></tr>`).join('')+
+    `</tbody></table>`;
+}
+function renderBillTable(bodyId,list){
+  const body=$(bodyId);if(!body)return;
+  if(!list.length){body.innerHTML='<tr><td colspan="6" class="empty">데이터 없음</td></tr>';return}
+  body.innerHTML=list.map((b,i)=>{
+    const uniq=[...new Set(b.items.map(x=>x[0]))];
+    const lead=b.items.slice().sort((p,q)=>q[1]-p[1])[0];
+    const item=lead?(uniq.length>1?`${lead[0]} 외 ${uniq.length-1}건`:lead[0]):'-';
+    const area=b.g1?`<span class="rc-tag">${esc(b.g1)}</span>`:'';
+    const svc=b.service?'<span class="rc-tag svc">서비스</span>':'';
+    return `<tr class="rc-row" data-i="${i}"><td class="rc-idx"><span class="rc-caret">▸</span></td><td class="rc-date">${esc(b.date||'-')}</td><td class="rc-cust" title="${esc(b.customer)}">${esc(b.customer||'-')}</td><td class="rc-item" title="${esc(uniq.join(', '))}">${esc(item)}</td><td>${area}${svc}</td><td class="rc-amt${b.amount<0?' neg':''}">${money(b.amount)}</td></tr>`+
+           `<tr class="rc-detail" data-d="${i}" style="display:none"><td colspan="6">${recentDetailHtml(b)}</td></tr>`;
+  }).join('');
+  body.querySelectorAll('tr.rc-row').forEach(tr=>tr.onclick=()=>{
+    const d=body.querySelector(`tr.rc-detail[data-d="${tr.dataset.i}"]`);
+    const open=d.style.display==='none';
+    d.style.display=open?'':'none';
+    tr.classList.toggle('open',open);
+  });
+}
+function renderRecent(rs){
+  const list=recentSales(rs,10);
+  $('recentSubtitle').textContent=`${selectedLabel()} · ${state.year}년 기준, 매출 전표 단위로 매출일이 가장 최근인 순서입니다. 줄을 누르면 품목 상세가 열립니다.`;
+  $('recentHint').textContent=list.length?`최신 ${list.length}건`:'';
+  renderBillTable('recentBody',list);
+}
+function renderBigDeals(rs){
+  const list=bigDeals(rs,5),tot=sum(rs);
+  $('bigDealSubtitle').textContent=`${selectedLabel()} · ${state.year}년 금액이 큰 매출 전표 순서입니다. 줄을 누르면 품목 상세가 열립니다.`;
+  const top=list.reduce((a,b)=>a+b.amount,0);
+  $('bigDealHint').textContent=list.length&&tot>0?`상위 ${list.length}건이 전체 매출의 ${(top/tot*100).toFixed(1)}%`:'';
+  renderBillTable('bigBody',list);
+}
+function scopeRowsY(y){
+  // areaRows() 와 같은 영역 조건을 다른 연도에도 적용한다.
+  const yr=rows.filter(r=>String(r.year)===String(y));
+  if(state.mode==='all')return yr.filter(r=>{const m=modeOf(r);return m==='domestic'||m==='overseas'});
+  if(state.mode==='domestic')return yr.filter(r=>modeOf(r)==='domestic');
+  const ov=yr.filter(r=>modeOf(r)==='overseas');
+  return state.segment==='all'?ov:ov.filter(r=>groupOf(r)===state.segment);
+}
+function customerTotals(rs){
+  const dateOf=r=>String(r.saleDate||'').trim().replace(/[./]/g,'-').slice(0,10);
+  const m=new Map();
+  rs.forEach(r=>{
+    const k=String(r.customer||'').trim();if(!k||k==='nan')return;
+    let c=m.get(k);if(!c){c={amount:0,first:'',last:''};m.set(k,c)}
+    c.amount+=n(r.amount);
+    const d=dateOf(r);if(d){if(!c.first||d<c.first)c.first=d;if(d>c.last)c.last=d}
+  });
+  for(const [k,c] of [...m.entries()])if(c.amount<=0)m.delete(k);   // 순매출이 0 이하인 거래처(취소·반품만 있는 경우)는 거래한 것으로 보지 않는다
+  return m;
+}
+function ccList(el,sumEl,items,sumHtml,emptyMsg,dateLabel){
+  sumEl.innerHTML=sumHtml;
+  if(!items.length){el.innerHTML=`<div class="empty">${emptyMsg}</div>`;return}
+  el.innerHTML=items.slice(0,8).map(([k,c],i)=>`<div class="cc-row"><span class="i">${i+1}</span><span class="nm" title="${esc(k)}">${esc(k)}</span><span class="dt">${esc(dateLabel(c)||'-')}</span><span class="am">${short(c.amount)}</span></div>`).join('')+
+    (items.length>8?`<div class="cc-sum" style="padding-top:8px;border-top:1px solid var(--line)">외 ${items.length-8}곳</div>`:'');
+}
+function renderCustChange(){
+  const y=Number(state.year);
+  const cur=customerTotals(scopeRowsY(y));
+  const prevRows=scopeRowsY(y-1);
+  const pastRows=[];
+  [...new Set(rows.map(r=>Number(r.year)).filter(v=>v&&v<y))].forEach(py=>pastRows.push(...scopeRowsY(py)));
+  const pastSet=new Set(customerTotals(pastRows).keys());
+  const prev=customerTotals(prevRows);
+  $('custChangeSubtitle').textContent=`${selectedLabel()} 기준 · ${y}년에 새로 거래를 시작한 거래처와, ${y-1}년에는 거래했지만 ${y}년에는 아직 거래가 없는 거래처입니다.`;
+  $('custChangeHint').textContent=pastRows.length?`데이터에 있는 ${Math.min(...pastRows.map(r=>Number(r.year)))}년 이후 기록 기준`:'';
+  if(!pastRows.length){
+    ccList($('ccNew'),$('ccNewSum'),[],'','이전 연도 데이터가 없어 비교할 수 없습니다.',()=>'');
+  }else{
+    const nw=[...cur.entries()].filter(([k])=>!pastSet.has(k)).sort((a,b)=>b[1].amount-a[1].amount);
+    const tot=nw.reduce((a,[,c])=>a+c.amount,0);
+    ccList($('ccNew'),$('ccNewSum'),nw,`<b>${nw.length}곳</b> · 매출 <b>${short(tot)}</b>`,'올해 새로 거래를 시작한 거래처가 없습니다.',c=>c.first);
+  }
+  if(!prevRows.length){
+    ccList($('ccLost'),$('ccLostSum'),[],'',`${y-1}년 데이터가 없어 비교할 수 없습니다.`,()=>'');
+  }else{
+    const ls=[...prev.entries()].filter(([k])=>!cur.has(k)).sort((a,b)=>b[1].amount-a[1].amount);
+    const tot=ls.reduce((a,[,c])=>a+c.amount,0);
+    ccList($('ccLost'),$('ccLostSum'),ls,`<b>${ls.length}곳</b> · ${y-1}년 매출 <b>${short(tot)}</b>`,'작년 거래처가 모두 올해도 거래 중입니다.',c=>c.last);
+  }
+}
+function top5Share(rs){
+  const m=customerTotals(rs);const arr=[...m.entries()].sort((a,b)=>b[1].amount-a[1].amount);
+  const tot=arr.reduce((a,[,c])=>a+c.amount,0);
+  const top=arr.slice(0,5);const t5=top.reduce((a,[,c])=>a+c.amount,0);
+  return {arr,tot,top,share:tot?t5/tot:0,t5};
+}
+function renderConc(rs){
+  const y=Number(state.year),c=top5Share(rs),p=top5Share(scopeRowsY(y-1));
+  const big=$('concBig');
+  if(!c.arr.length){big.innerHTML='';$('concRank').innerHTML='<div class="empty">데이터 없음</div>';return}
+  let delta='';
+  if(p.arr.length){const d=(c.share-p.share)*100;delta=`<span class="conc-delta ${d>0?'up':'down'}">${y-1}년 ${(p.share*100).toFixed(1)}% 대비 ${d>=0?'+':''}${d.toFixed(1)}%p</span>`}
+  else delta=`<span>${y-1}년 데이터가 없어 비교할 수 없습니다.</span>`;
+  big.innerHTML=`<b>${(c.share*100).toFixed(1)}%</b><span>거래처 ${c.arr.length}곳 중 상위 5곳 · ${short(c.t5)} / ${short(c.tot)}</span>`+`<span style="margin-left:auto">${delta}</span>`;
+  const mx=c.top[0][1].amount||1;
+  $('concRank').innerHTML=c.top.map(([k,v],i)=>`<div class="rank-row"><span class="idx">${i+1}</span><div><div class="name" title="${esc(k)}">${esc(k)}</div><div class="rank-line"><i style="width:${(v.amount/mx*100).toFixed(1)}%"></i></div></div><span class="rank-val">${(v.amount/c.tot*100).toFixed(1)}%</span></div>`).join('');
+}
+function renderModel(rs){$('modelRank').innerHTML=rank(rs,'model',8)}
+function renderProfit(rs){
+  const y=Number(state.year);
+  const A=sum(rs),P=rs.reduce((a,r)=>a+n(r.profit),0),has=rs.some(r=>n(r.profit)!==0);
+  const pr=scopeRowsY(y-1),PA=sum(pr),PP=pr.reduce((a,r)=>a+n(r.profit),0),phas=pr.some(r=>n(r.profit)!==0);
+  const pctTxt=v=>(v*100).toFixed(1)+'%';
+  $('profitSubtitle').textContent=`${selectedLabel()} · ${y}년 기준, PROFIT_AMT 이익과 이익률(이익 ÷ 매출)입니다.`;
+  const noData='<div class="empty">이익 데이터가 없습니다 (PROFIT_AMT 가 모두 0 이거나 비어 있음)</div>';
+  if(!has){
+    $('pfTotal').textContent='—';$('pfRate').textContent='—';$('pfTotalSub').textContent='이익 데이터 없음';
+    $('pfPrev').textContent='—';$('pfPrevSub').textContent='';$('profitHint').textContent='';
+    $('pfTop').innerHTML=noData;$('pfLow').innerHTML=noData;return;
+  }
+  $('pfTotal').textContent=money(P);$('pfTotalSub').textContent='선택 영역 기준';
+  $('pfRate').textContent=A?pctTxt(P/A):'—';
+  $('pfPrev').textContent=phas&&PA?pctTxt(PP/PA):'—';
+  $('pfPrevSub').textContent=phas&&PA?`${y-1}년 연간 기준`:`${y-1}년 이익 데이터 없음`;
+  $('profitHint').textContent=`이익이 입력된 전표만 이익률 순위에 포함`;
+  // 이익 상위 거래처
+  const cm=new Map();
+  rs.forEach(r=>{const k=String(r.customer||'').trim();if(!k||k==='nan')return;let c=cm.get(k);if(!c){c={amount:0,profit:0};cm.set(k,c)}c.amount+=n(r.amount);c.profit+=n(r.profit)});
+  const top=[...cm.entries()].filter(([,c])=>c.profit>0).sort((a,b)=>b[1].profit-a[1].profit).slice(0,8);
+  $('pfTop').innerHTML=top.length?top.map(([k,c],i)=>`<div class="cc-row"><span class="i">${i+1}</span><span class="nm" title="${esc(k)}">${esc(k)}</span><span class="dt${c.amount&&c.profit/c.amount<0?' neg':''}">${c.amount?pctTxt(c.profit/c.amount):'-'}</span><span class="am">${short(c.profit)}</span></div>`).join(''):'<div class="empty">데이터 없음</div>';
+  // 이익률 낮은 전표
+  const low=billGroups(rs).filter(b=>b.hasProfit&&b.amount>0).map(b=>({b,m:b.profit/b.amount})).sort((x,y2)=>x.m-y2.m).slice(0,8);
+  $('pfLow').innerHTML=low.length?low.map(({b,m},i)=>`<div class="cc-row"><span class="i">${i+1}</span><span class="nm" title="${esc((b.date||'')+' · '+(b.customer||''))}">${esc(b.customer||'-')}</span><span class="dt${m<0?' neg':''}">${pctTxt(m)}</span><span class="am">${short(b.amount)}</span></div>`).join(''):'<div class="empty">데이터 없음</div>';
+}
+function renderAll(){
+  syncSelectionUI();
+  renderNav();
+  normalizeTopModeLabels();
+  const rs=areaRows();
+  const jobs=[
+    ['kpi',()=>renderKPIs(rs)],
+    ['recent',()=>renderRecent(rs)],
+    ['custChange',()=>renderCustChange()],
+    ['bigDeals',()=>renderBigDeals(rs)],
+    ['conc',()=>renderConc(rs)],
+    ['model',()=>renderModel(rs)],
+    ['profit',()=>renderProfit(rs)],
+    ['targets',()=>renderTargets()],
+    ['visuals',()=>renderVisuals(rs)],
+    ['executive',()=>renderExecutive(rs)],
+    ['analytics',()=>renderAdvancedAnalytics(rs)],
+    ['months',()=>renderMonths(rs)],
+    ['quarter',()=>renderQuarter(rs)],
+    ['ranks',()=>renderRanks(rs)],
+    ['owner',()=>renderOwnerWithOverride(rs)],
+    ['funnel',()=>renderFunnel(rs)]
+  ];
+  jobs.forEach(([name,fn])=>{try{fn()}catch(err){console.error(`[Dashboard:${name}]`,err)}});
+  $('updated').textContent=LATEST_UPDATE;
+  renderStale();
+  $('sourceNote').textContent=`${rows.length.toLocaleString('ko-KR')}건의 영업매출 데이터가 CSV에서 로드되었습니다.`;
+  $('yearSelect').value=state.year;
+}
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;state.segment='all';state.analyticsAreaKey=null;state.editGoals=false;renderAll()});
+$('yearSelect').onchange=e=>{state.year=e.target.value;state.analyticsAreaKey=null;renderAll()};
+
+// ===================== 담당자별 상세 =====================
+function bindOwnerClicks(exclude){
+  const box=$('owner'); if(!box) return;
+  box.querySelectorAll('.rank-row').forEach(row=>{
+    const nm=row.querySelector('.name'); if(!nm) return;
+    row.title='클릭하면 담당자별 상세를 봅니다';
+    row.onclick=()=>openOwnerDetail(nm.textContent.trim(),exclude);
+  });
+  let hint=box.parentElement.querySelector('.ow-hint');
+  if(!hint&&box.querySelector('.rank-row')){hint=document.createElement('div');hint.className='ow-hint';hint.textContent='이름을 누르면 담당자별 상세를 볼 수 있습니다.';box.parentElement.insertBefore(hint,box)}
+}
+function ownerRowsFor(name,exclude){
+  // 순위와 같은 기준: 현재 영역·연도, 담당자 규칙 적용, 해외법인 제외 선택 반영, 양(+)의 매출만
+  return lastOwnerRows.filter(r=>overrideOwner(r)===name&&!(exclude&&isCorpRow(r))&&n(r.amount)>0);
+}
+function monthBars(rs){
+  const by=new Array(12).fill(0);rs.forEach(r=>{const m=n(r.month);if(m>=1&&m<=12)by[m-1]+=n(r.amount)});
+  const mx=Math.max(...by,1);
+  return by.map((v,i)=>`<div class="month-row"><span class="m">${i+1}월</span><span class="month-bar"><i style="width:${v?Math.max(2,v/mx*100):0}%"></i></span><span class="amt">${short(v)}</span></div>`).join('');
+}
+function openOwnerDetail(name,exclude){
+  const rs=ownerRowsFor(name,exclude);
+  const total=sum(rs),svc=sum(service(rs)),cust=new Set(rs.map(r=>String(r.customer||'').trim()).filter(Boolean)).size;
+  const bills=new Set(rs.map(r=>String(r.billNum||'').trim()).filter(Boolean)).size||rs.length;
+  const grp=rs.map(r=>({...r,grp:groupLabel[groupOf(r)]||'기타'}));
+  $('ownerCard').innerHTML=`
+    <div class="mx-head"><div><h3>${esc(name)}</h3><p>${esc(state.year)}년 · ${esc(selectedLabel())} · 부가세 포함 · 순위와 같은 기준(반품·음수 제외${exclude?', 해외법인 제외':''})</p></div><button class="mx-close" id="ownerClose">닫기 ✕</button></div>
+    <div class="mx-kpis">
+      <div class="mx-kpi"><div class="l">총 매출</div><div class="v">${short(total)}</div></div>
+      <div class="mx-kpi"><div class="l">서비스 매출</div><div class="v">${short(svc)}</div></div>
+      <div class="mx-kpi"><div class="l">서비스 제외 매출</div><div class="v">${short(total-svc)}</div></div>
+      <div class="mx-kpi"><div class="l">거래처 수 · 전표</div><div class="v">${cust.toLocaleString('ko-KR')} · ${bills.toLocaleString('ko-KR')}</div></div>
+    </div>
+    <div class="mx-grid">
+      <div class="mx-box"><h4>월별 매출</h4><div class="months">${monthBars(rs)}</div></div>
+      <div class="mx-box"><h4>영역 구성</h4><div class="rank">${rank(grp,'grp',6)}</div><h4 style="margin-top:14px">국가</h4><div class="rank">${rank(rs,'country',5)}</div></div>
+      <div class="mx-box"><h4>주요 거래처 Top 8</h4><div class="rank">${rank(rs,'customer')}</div></div>
+      <div class="mx-box"><h4>주요 제품 Top 8</h4><div class="rank">${rank(rs,'itemName')}</div></div>
+    </div>
+    <div class="mx-note">영업담당 순위에서 이름을 눌러 열었습니다. 연도·영역·해외법인 제외/포함 선택을 바꾼 뒤 다시 누르면 그 기준으로 보여 줍니다.</div>`;
+  $('ownerModal').classList.add('open');
+  $('ownerModal').scrollTop=0;
+  $('ownerClose').onclick=closeOwnerDetail;
+}
+function closeOwnerDetail(){$('ownerModal').classList.remove('open')}
+$('ownerModal').addEventListener('click',e=>{if(e.target===$('ownerModal'))closeOwnerDetail()});
+
+// ===================== 월간 요약 (PDF) =====================
+const RP_KEY='phydemoReportOptsV1';
+function rpLoad(){try{return JSON.parse(localStorage.getItem(RP_KEY)||'{}')}catch(e){return {}}}
+function rpSave(){try{localStorage.setItem(RP_KEY,JSON.stringify({target:$('rpTarget').checked,top:$('rpTop').checked,trend:$('rpTrend').checked}))}catch(e){}}
+const scopeRows=()=>rows.filter(r=>modeOf(r)!=='other');
+const monthOf=r=>n(r.month);
+function sumM(rs,y,m,cum){return sum(rs.filter(r=>String(r.year)===String(y)&&(cum?monthOf(r)>=1&&monthOf(r)<=m:monthOf(r)===m)))}
+function delta(cur,prev){
+  if(!prev) return '<span style="color:#6e6e73">-</span>';
+  const p=(cur-prev)/Math.abs(prev)*100,up=p>=0;
+  return `<span class="${up?'rp-up':'rp-down'}">${up?'▲':'▼'} ${Math.abs(p).toFixed(1)}%</span>`;
+}
+function topPairs(rs,key,limit){
+  const m=new Map();
+  rs.forEach(r=>{const k=String(r[key]||'').trim();if(!k||k==='nan'||n(r.amount)<=0)return;m.set(k,(m.get(k)||0)+n(r.amount))});
+  return [...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,limit);
+}
+function topTable(title,pairs,base){
+  const body=pairs.length?pairs.map(([k,v])=>`<tr><td title="${esc(k)}">${esc(k)}</td><td>${short(v)}</td><td>${base?(v/base*100).toFixed(0):0}%</td></tr>`).join(''):'<tr><td colspan="3" class="nodata">데이터 없음</td></tr>';
+  return `<div><h3>${esc(title)}</h3><table><tbody>${body}</tbody></table></div>`;
+}
+function rpLatestMonth(){
+  const y=state.year,ms=rows.filter(r=>String(r.year)===y).map(monthOf).filter(m=>m>=1&&m<=12);
+  return ms.length?Math.max(...ms):(String(nowYear)===y?new Date().getMonth()+1:12);
+}
+function buildReport(){
+  const y=Number(state.year),m=Number($('rpMonth').value)||1;
+  const all=scopeRows();
+  const cur=sumM(all,y,m,false),cum=sumM(all,y,m,true);
+  const pm=m===1?[y-1,12]:[y,m-1];
+  const prevMonth=sumM(all,pm[0],pm[1],false),prevYear=sumM(all,y-1,m,false),prevCum=sumM(all,y-1,m,true);
+  let html=`<h1>월간 영업 매출 요약</h1><div class="sub">${y}년 ${m}월 · 국내 + 해외 · 부가세 포함 · 데이터 기준일 ${esc(String(LATEST_UPDATE).slice(0,16))}</div>
+  <div class="rp-kpis">
+    <div class="rp-kpi"><div class="l">${m}월 매출</div><div class="v">${short(cur)}</div></div>
+    <div class="rp-kpi"><div class="l">누적 (1~${m}월)</div><div class="v">${short(cum)}</div></div>
+    <div class="rp-kpi"><div class="l">전월 대비</div><div class="v">${delta(cur,prevMonth)}</div></div>
+    <div class="rp-kpi"><div class="l">전년 동월 대비</div><div class="v">${delta(cur,prevYear)}</div></div>
+  </div>`;
+  if($('rpTarget').checked){
+    const g=yearGoals();
+    const keys=[['dealer','대리점'],['skd','SKD / OEM / ODM'],['corp','해외법인'],['domestic','국내영업']];
+    let tg=0,ta=0,tm=0;
+    const trs=keys.map(([k,label])=>{
+      const rs=rows.filter(r=>groupOf(r)===k);
+      const goal=n(g[k]),act=sumM(rs,y,m,true),mon=sumM(rs,y,m,false);
+      tg+=goal;ta+=act;tm+=mon;
+      const p=goal?act/goal*100:0;
+      return `<tr><td>${esc(label)}</td><td>${goal?short(goal):'-'}</td><td>${short(act)}</td><td>${goal?p.toFixed(1)+'%':'-'}</td><td class="rp-bar-cell">${goal?`<div class="rp-trk"><i style="width:${Math.min(100,p).toFixed(1)}%"></i></div>`:''}</td><td>${short(mon)}</td></tr>`;
+    }).join('');
+    const tp=tg?ta/tg*100:0;
+    const svcRow=(mode,label)=>{
+      const rs=rows.filter(r=>modeOf(r)===mode&&String(r.year)===String(y)&&monthOf(r)>=1&&monthOf(r)<=m);
+      const tot=sum(rs),sv=sum(service(rs));
+      const goal=serviceGoalValue(mode);
+      return `<tr><td>${label} 서비스</td><td>${goal?short(goal):'-'}</td><td>${short(sv)}</td><td>${goal?(sv/goal*100).toFixed(1)+'%':'-'}</td><td></td><td>서비스 제외 ${short(tot-sv)}</td></tr>`;
+    };
+    html+=`<h2>목표 달성 현황 (누적, 1~${m}월)</h2>
+    <table><thead><tr><th>영역</th><th>연간 목표</th><th>누적 매출</th><th>달성률</th><th></th><th>${m}월 매출</th></tr></thead><tbody>${trs}
+    <tr class="tot"><td>합계</td><td>${tg?short(tg):'-'}</td><td>${short(ta)}</td><td>${tg?tp.toFixed(1)+'%':'-'}</td><td class="rp-bar-cell">${tg?`<div class="rp-trk"><i style="width:${Math.min(100,tp).toFixed(1)}%"></i></div>`:''}</td><td>${short(tm)}</td></tr>
+    ${svcRow('overseas','해외')}${svcRow('domestic','국내')}</tbody></table>`;
+  }
+  if($('rpTop').checked){
+    const mrs=all.filter(r=>String(r.year)===String(y)&&monthOf(r)===m);
+    const exclude=(state.ownerCorp||loadOwnerCorp())==='exclude';
+    const ownerRs=mrs.map(r=>({...r,owner:overrideOwner(r)})).filter(r=>r.owner&&!(exclude&&isCorpRow(r)));
+    const posTotal=mrs.filter(r=>n(r.amount)>0).reduce((a,r)=>a+n(r.amount),0);
+    const ownerTotal=ownerRs.filter(r=>n(r.amount)>0).reduce((a,r)=>a+n(r.amount),0);
+    html+=`<h2>${m}월 상위 거래처 · 제품 · 영업담당 (Top 5)</h2><div class="rp-cols">
+      ${topTable('거래처',topPairs(mrs,'customer',5),posTotal)}
+      ${topTable('제품',topPairs(mrs,'itemName',5),posTotal)}
+      ${topTable('영업담당'+(exclude?' (해외법인 제외)':''),topPairs(ownerRs,'owner',5),ownerTotal)}
+    </div>`;
+  }
+  if($('rpTrend').checked){
+    const mx=Math.max(1,...Array.from({length:m},(_,i)=>Math.max(sumM(all,y,i+1,false),sumM(all,y-1,i+1,false))));
+    const trs=Array.from({length:m},(_,i)=>{
+      const a=sumM(all,y,i+1,false),b=sumM(all,y-1,i+1,false);
+      return `<tr style="${i+1===m?'background:#eef4ff;font-weight:700':''}"><td>${i+1}월</td><td>${short(a)}</td><td class="rp-bar-cell"><div class="rp-trk"><i style="width:${(a/mx*100).toFixed(1)}%"></i></div></td><td>${short(b)}</td><td>${delta(a,b)}</td></tr>`;
+    }).join('');
+    html+=`<h2>월별 추이 · 전년 동월 비교</h2><table><thead><tr><th>월</th><th>${y}년</th><th></th><th>${y-1}년</th><th>전년 대비</th></tr></thead><tbody>${trs}
+      <tr class="tot"><td>누적 (1~${m}월)</td><td>${short(cum)}</td><td></td><td>${short(prevCum)}</td><td>${delta(cum,prevCum)}</td></tr></tbody></table>`;
+  }
+  html+=`<div class="rp-foot"><span>Sales Dashboard · 월간 요약</span><span>출력 ${new Date().toLocaleDateString('ko-KR')}</span></div>`;
+  $('reportSheet').innerHTML=html;
+}
+function openReport(){
+  const o=rpLoad();
+  [['target','rpTarget'],['top','rpTop'],['trend','rpTrend']].forEach(([k,id])=>{$(id).checked=o[k]!==false});
+  $('rpMonth').innerHTML=Array.from({length:12},(_,i)=>`<option value="${i+1}">${state.year}년 ${i+1}월</option>`).join('');
+  $('rpMonth').value=String(rpLatestMonth());
+  buildReport();
+  $('reportModal').classList.add('open');
+  $('reportModal').scrollTop=0;
+}
+function closeReport(){$('reportModal').classList.remove('open')}
+$('reportBtn').onclick=openReport;
+$('rpClose').onclick=closeReport;
+['rpMonth','rpTarget','rpTop','rpTrend'].forEach(id=>$(id).addEventListener('change',()=>{rpSave();buildReport()}));
+$('rpPrint').onclick=()=>{
+  const old=document.title;
+  document.title=`월간영업요약_${state.year}-${String($('rpMonth').value).padStart(2,'0')}`;
+  document.body.classList.add('printing-report');
+  const done=()=>{document.body.classList.remove('printing-report');document.title=old;window.removeEventListener('afterprint',done)};
+  window.addEventListener('afterprint',done);
+  setTimeout(()=>window.print(),50);
+};
+$('reportModal').addEventListener('click',e=>{if(e.target===$('reportModal'))closeReport()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeOwnerDetail();closeReport()}});
+
+$('exportBtn').onclick=exportCsv;
+window.__redrawAnalytics=()=>renderAdvancedAnalytics(areaRows());
+renderAll();
+}
+
+
+window.addEventListener('load',()=>setTimeout(()=>{if(window.__redrawAnalytics)window.__redrawAnalytics()},180));
+
+window.addEventListener('resize',()=>{clearTimeout(window.__biResize);window.__biResize=setTimeout(()=>{if(window.__redrawAnalytics)window.__redrawAnalytics()},180)});
+
+// CSV 로더: HTML을 더블클릭(file://)해도 사용할 수 있도록 파일 선택을 지원합니다.
+const CSV_FILE_NAME = '영업매출현황.csv';
+const csvInput = document.getElementById('csvInput');
+const csvStatus = document.getElementById('csvStatus');
+function setCsvStatus(msg, error=false){ if(csvStatus){ csvStatus.textContent=msg; csvStatus.classList.toggle('error',!!error); } }
+function parseCSV(text){
+  text = text.replace(/^\uFEFF/, '');
+  const out=[], row=[]; let cell='', quoted=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(quoted){
+      if(ch==='"'){ if(text[i+1]==='"'){cell+='"';i++;} else quoted=false; }
+      else cell+=ch;
+    }else{
+      if(ch==='"') quoted=true;
+      else if(ch===','){row.push(cell);cell='';}
+      else if(ch==='\n'){row.push(cell);out.push(row.slice());row.length=0;cell='';}
+      else if(ch!=='\r') cell+=ch;
+    }
+  }
+  if(cell!=='' || row.length){row.push(cell);out.push(row);}
+  return out;
+}
+function csvToDashboardData(text){
+  const matrix=parseCSV(text);
+  if(!matrix.length) throw new Error('CSV가 비어 있습니다.');
+  const h=matrix[0].map(x=>String(x).trim());
+  const idx=Object.fromEntries(h.map((x,i)=>[x,i]));
+  const req=['구분1','구분2','구분3','매출년도','매출월','SUM_SALE_AMT_WON'];
+  const missing=req.filter(k=>idx[k]===undefined);
+  if(missing.length) throw new Error('필수 컬럼이 없습니다: '+missing.join(', '));
+  const get=(a,k)=>idx[k]===undefined?'':a[idx[k]];
+  const num=v=>{const x=Number(String(v??'').replaceAll(',','').trim());return Number.isFinite(x)?x:0};
+  const rows=matrix.slice(1).filter(a=>a.length>1).map(a=>({
+    year:String(get(a,'매출년도')).trim(), month:String(get(a,'매출월')).trim(),
+    quarter:String(get(a,'분기')).trim(), amount:num(get(a,'SUM_SALE_AMT_WON')),
+    profit:num(get(a,'PROFIT_AMT')), margin:num(get(a,'MARGIN_RATE')),
+    customer:String(get(a,'CUSTOM_NAME')).trim(), country:String(get(a,'NATION_NAME')).trim(),
+    region:String(get(a,'지역')).trim(), itemCode:String(get(a,'ITEM_CODE')).trim(),
+    itemName:String(get(a,'ITEM_NAME')).trim(), model:String(get(a,'MODEL_NAME')||get(a,'MODEL_CODE')).trim(),
+    owner:String(get(a,'영업담당_집계')).trim(), dept:String(get(a,'DEPT_NAME')).trim(),
+    deptClass:String(get(a,'매출부서분류')).trim(), projectNo:String(get(a,'PROJECT_NO')).trim(),
+    projectName:String(get(a,'PJT_NAME')).trim(), funnelNo:String(get(a,'관련수주펀넬번호')).trim(),
+    updated:String(get(a,'UPDATE_DTM')).trim(), billNum:String(get(a,'BILL_NUM')).trim(),
+    billSeq:String(get(a,'BILL_SEQ')).trim(), orderType:String(get(a,'ORDER_TYPE')).trim(),
+    billTypeName:String(get(a,'BILL_TYPE_NAME')).trim(), g1:String(get(a,'구분1')).trim(),
+    g2:String(get(a,'구분2')).trim(), g3:String(get(a,'구분3')).trim(),
+    saleDate:String(get(a,'SALE_DATE')||get(a,'매출일')).trim(), continent:String(get(a,'CONTINENT')).trim(),
+    salesClass:String(get(a,'매출분류1_정규_PRJ_매출')).trim(), customCode:String(get(a,'CUSTOM_CODE')).trim()
+  }));
+  return {fields:['year','month','quarter','amount','profit','margin','customer','country','region','itemCode','itemName','model','owner','dept','deptClass','projectNo','projectName','funnelNo','updated','billNum','billSeq','orderType','billTypeName','g1','g2','g3','saleDate','continent','salesClass','customCode'],rows:rows.map(r=>['year','month','quarter','amount','profit','margin','customer','country','region','itemCode','itemName','model','owner','dept','deptClass','projectNo','projectName','funnelNo','updated','billNum','billSeq','orderType','billTypeName','g1','g2','g3','saleDate','continent','salesClass','customCode'].map(k=>r[k]))};
+}
+async function loadCsvText(text, sourceName){
+  try{ const data=csvToDashboardData(text); if(!data.rows.length) throw new Error('표시할 매출 데이터가 없습니다.'); initDashboard(data); setCsvStatus(`${sourceName} · ${data.rows.length.toLocaleString('ko-KR')}건 로드 완료`); }
+  catch(e){ setCsvStatus('CSV 처리 실패: '+e.message,true); console.error(e); }
+}
+if(csvInput) csvInput.onchange=()=>{
+  const f=csvInput.files?.[0];
+  if(!f)return;
+  setCsvStatus(f.name+' 읽는 중...');
+  const r=new FileReader();
+  r.onload=()=>loadCsvText(r.result,f.name);
+  r.onerror=()=>setCsvStatus('CSV 파일을 읽을 수 없습니다.',true);
+  r.readAsText(f,'UTF-8');
+};
+(async()=>{
+  // Sales Dashboard 가 미리 데이터를 넣어 둔 경우: CSV 선택 없이 바로 표시합니다.
+  if(DATA.rows.length){
+    initDashboard(DATA);
+    setCsvStatus(`${DATA.rows.length.toLocaleString('ko-KR')}건 로드 완료 (PHY 자동 생성)`);
+    return;
+  }
+  // file:// 로 HTML을 더블클릭해 여는 경우 브라우저 보안상
+  // 같은 폴더의 CSV를 fetch()로 자동 읽을 수 없습니다.
+  // 이 경우 페이지를 깨뜨리지 않고 CSV 선택만 요청합니다.
+  if(location.protocol === 'file:'){
+    setCsvStatus('HTML을 직접 열었습니다. 아래에서 영업매출현황.csv를 한 번 선택하세요.');
+    return;
+  }
+  setCsvStatus('영업매출현황.csv 자동 불러오는 중...');
+  try{
+    const res=await fetch(CSV_FILE_NAME+'?v='+Date.now(),{cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    await loadCsvText(await res.text(),CSV_FILE_NAME);
+  }catch(e){
+    setCsvStatus('자동 불러오기 실패. 아래에서 영업매출현황.csv를 선택하세요.',true);
+  }
+})();
+</script>
+</body>
+</html>
